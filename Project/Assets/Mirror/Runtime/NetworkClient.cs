@@ -70,11 +70,6 @@ namespace Mirror
         /// </summary>
         public static bool isLocalClient => connection is ULocalConnectionToServer;
 
-        // local client in host mode might call Cmds/Rpcs during Update, but we
-        // want to apply them in LateUpdate like all other Transport messages
-        // to avoid race conditions. keep packets in Queue until LateUpdate.
-        internal static Queue<byte[]> localClientPacketQueue = new Queue<byte[]>();
-
         /// <summary>
         /// Connect client to a NetworkServer instance.
         /// </summary>
@@ -91,7 +86,7 @@ namespace Mirror
             Transport.activeTransport.ClientConnect(address);
 
             // setup all the handlers
-            connection = new NetworkConnection(address, 0);
+            connection = new NetworkConnectionToServer();
             connection.SetHandlers(handlers);
         }
 
@@ -106,12 +101,16 @@ namespace Mirror
 
             connectState = ConnectState.Connected;
 
-            // create local connection to server
-            connection = new ULocalConnectionToServer();
+            // create local connection objects and connect them
+            ULocalConnectionToServer connectionToServer = new ULocalConnectionToServer();
+            ULocalConnectionToClient connectionToClient = new ULocalConnectionToClient();
+            connectionToServer.connectionToClient = connectionToClient;
+            connectionToClient.connectionToServer = connectionToServer;
+
+            connection = connectionToServer;
             connection.SetHandlers(handlers);
 
             // create server connection to local client
-            ULocalConnectionToClient connectionToClient = new ULocalConnectionToClient();
             NetworkServer.SetLocalConnection(connectionToClient);
             connectionToClient.Send(new ConnectMessage());
         }
@@ -122,7 +121,7 @@ namespace Mirror
         /// <param name="localPlayer"></param>
         internal static void AddLocalPlayer(NetworkIdentity localPlayer)
         {
-            if (LogFilter.Debug) Debug.Log("Local client AddLocalPlayer " + localPlayer.gameObject.name + " conn=" + connection.connectionId);
+            if (LogFilter.Debug) Debug.Log("Local client AddLocalPlayer " + localPlayer.gameObject.name + " " + connection);
             connection.isReady = true;
             connection.identity = localPlayer;
             if (localPlayer != null)
@@ -205,7 +204,6 @@ namespace Mirror
                 if (connection != null)
                 {
                     connection.Disconnect();
-                    connection.Dispose();
                     connection = null;
                     RemoveTransportHandlers();
                 }
@@ -267,16 +265,9 @@ namespace Mirror
         internal static void Update()
         {
             // local or remote connection?
-            if (isLocalClient)
+            if (connection is ULocalConnectionToServer localConnection)
             {
-                // process internal messages so they are applied at the correct time
-                while (localClientPacketQueue.Count > 0)
-                {
-                    byte[] packet = localClientPacketQueue.Dequeue();
-                    // TODO avoid serializing and deserializng the message
-                    // just pass it as is
-                    OnDataReceived(new ArraySegment<byte>(packet), Channels.DefaultReliable);
-                }
+                localConnection.Update();
             }
             else
             {
@@ -353,8 +344,7 @@ namespace Mirror
                 RegisterHandler<ObjectDestroyMessage>(ClientScene.OnLocalClientObjectDestroy);
                 RegisterHandler<ObjectHideMessage>(ClientScene.OnLocalClientObjectHide);
                 RegisterHandler<NetworkPongMessage>((conn, msg) => { }, false);
-                RegisterHandler<SpawnPrefabMessage>(ClientScene.OnLocalClientSpawnPrefab);
-                RegisterHandler<SpawnSceneObjectMessage>(ClientScene.OnLocalClientSpawnSceneObject);
+                RegisterHandler<SpawnMessage>(ClientScene.OnLocalClientSpawn);
                 RegisterHandler<ObjectSpawnStartedMessage>((conn, msg) => { }); // host mode doesn't need spawning
                 RegisterHandler<ObjectSpawnFinishedMessage>((conn, msg) => { }); // host mode doesn't need spawning
                 RegisterHandler<UpdateVarsMessage>((conn, msg) => { });
@@ -364,8 +354,7 @@ namespace Mirror
                 RegisterHandler<ObjectDestroyMessage>(ClientScene.OnObjectDestroy);
                 RegisterHandler<ObjectHideMessage>(ClientScene.OnObjectHide);
                 RegisterHandler<NetworkPongMessage>(NetworkTime.OnClientPong, false);
-                RegisterHandler<SpawnPrefabMessage>(ClientScene.OnSpawnPrefab);
-                RegisterHandler<SpawnSceneObjectMessage>(ClientScene.OnSpawnSceneObject);
+                RegisterHandler<SpawnMessage>(ClientScene.OnSpawn);
                 RegisterHandler<ObjectSpawnStartedMessage>(ClientScene.OnObjectSpawnStarted);
                 RegisterHandler<ObjectSpawnFinishedMessage>(ClientScene.OnObjectSpawnFinished);
                 RegisterHandler<UpdateVarsMessage>(ClientScene.OnUpdateVarsMessage);

@@ -76,7 +76,6 @@ namespace Mirror.Weaver
         public static MethodReference NetworkServerGetActive;
         public static MethodReference NetworkServerGetLocalClientActive;
         public static MethodReference NetworkClientGetActive;
-        public static MethodReference getBehaviourIsServer;
 
         // custom attribute types
         public static TypeReference SyncVarType;
@@ -108,6 +107,9 @@ namespace Mirror.Weaver
         public static TypeReference gameObjectType;
         public static TypeReference transformType;
 
+        public static MethodReference syncVarEqualReference;
+        public static MethodReference syncVarNetworkIdentityEqualReference;
+        public static MethodReference syncVarGameObjectEqualReference;
         public static MethodReference setSyncVarReference;
         public static MethodReference setSyncVarHookGuard;
         public static MethodReference getSyncVarHookGuard;
@@ -285,7 +287,9 @@ namespace Mirror.Weaver
             ClientSceneType = NetAssembly.MainModule.GetType("Mirror.ClientScene");
             ReadyConnectionReference = Resolvers.ResolveMethod(ClientSceneType, CurrentAssembly, "get_readyConnection");
 
-            getBehaviourIsServer = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "get_isServer");
+            syncVarEqualReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SyncVarEqual");
+            syncVarNetworkIdentityEqualReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SyncVarNetworkIdentityEqual");
+            syncVarGameObjectEqualReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SyncVarGameObjectEqual");
             setSyncVarReference = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "SetSyncVar");
             setSyncVarHookGuard = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "setSyncVarHookGuard");
             getSyncVarHookGuard = Resolvers.ResolveMethod(NetworkBehaviourType, CurrentAssembly, "getSyncVarHookGuard");

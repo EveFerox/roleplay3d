@@ -61,15 +61,15 @@ namespace Mirror.Examples.ListServer
         // all the servers, stored as dict with unique ip key so we can
         // update them more easily
         // (use "ip:port" if port is needed)
-        Dictionary<string, ServerStatus> _list = new Dictionary<string, ServerStatus>();
+        Dictionary<string, ServerStatus> list = new Dictionary<string, ServerStatus>();
 
         void Start()
         {
             // examples
-            //_list["127.0.0.1"] = new ServerStatus("127.0.0.1", "Deathmatch", 3, 10);
-            //_list["192.168.0.1"] = new ServerStatus("192.168.0.1", "Free for all", 7, 10);
-            //_list["172.217.22.3"] = new ServerStatus("172.217.22.3", "5vs5", 10, 10);
-            //_list["172.217.16.142"] = new ServerStatus("172.217.16.142", "Hide & Seek Mod", 0, 10);
+            //list["127.0.0.1"] = new ServerStatus("127.0.0.1", "Deathmatch", 3, 10);
+            //list["192.168.0.1"] = new ServerStatus("192.168.0.1", "Free for all", 7, 10);
+            //list["172.217.22.3"] = new ServerStatus("172.217.22.3", "5vs5", 10, 10);
+            //list["172.217.16.142"] = new ServerStatus("172.217.16.142", "Hide & Seek Mod", 0, 10);
 
             // Update once a second. no need to try to reconnect or read data
             // in each Update call
@@ -165,7 +165,7 @@ namespace Mirror.Examples.ListServer
             string key = ip/* + ":" + port*/;
 
             // find existing or create new one
-            if (_list.TryGetValue(key, out ServerStatus server))
+            if (list.TryGetValue(key, out ServerStatus server))
             {
                 // refresh
                 server.title = title;
@@ -179,7 +179,7 @@ namespace Mirror.Examples.ListServer
             }
 
             // save
-            _list[key] = server;
+            list[key] = server;
         }
 
         void TickClient()
@@ -206,7 +206,7 @@ namespace Mirror.Examples.ListServer
 
 #if !UNITY_WEBGL // Ping isn't known in WebGL builds
                     // ping again if previous ping finished
-                    foreach (ServerStatus server in _list.Values)
+                    foreach (ServerStatus server in list.Values)
                     {
                         if (server.ping.isDone)
                         {
@@ -228,7 +228,7 @@ namespace Mirror.Examples.ListServer
             else if (clientToListenConnection.Connected)
             {
                 clientToListenConnection.Disconnect();
-                _list.Clear();
+                list.Clear();
             }
 
             // refresh UI afterwards
@@ -260,28 +260,28 @@ namespace Mirror.Examples.ListServer
                 // status text
                 if (clientToListenConnection.Connecting)
                 {
-                    statusText.color = Color.yellow;
+                    //statusText.color = Color.yellow;
                     statusText.text = "Connecting...";
                 }
                 else if (clientToListenConnection.Connected)
                 {
-                    statusText.color = Color.green;
+                    //statusText.color = Color.green;
                     statusText.text = "Connected!";
                 }
                 else
                 {
-                    statusText.color = Color.gray;
+                    //statusText.color = Color.gray;
                     statusText.text = "Disconnected";
                 }
 
                 // instantiate/destroy enough slots
-                BalancePrefabs(slotPrefab.gameObject, _list.Count, content);
+                BalancePrefabs(slotPrefab.gameObject, list.Count, content);
 
                 // refresh all members
-                for (int i = 0; i < _list.Values.Count; ++i)
+                for (int i = 0; i < list.Values.Count; ++i)
                 {
                     UIServerStatusSlot slot = content.GetChild(i).GetComponent<UIServerStatusSlot>();
-                    ServerStatus server = _list.Values.ToList()[i];
+                    ServerStatus server = list.Values.ToList()[i];
                     slot.titleText.text = server.title;
                     slot.playersText.text = server.players + "/" + server.capacity;
                     slot.latencyText.text = server.lastLatency != -1 ? server.lastLatency.ToString() : "...";

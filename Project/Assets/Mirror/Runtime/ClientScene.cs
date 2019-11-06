@@ -438,60 +438,81 @@ namespace Mirror
             return null;
         }
 
-        static void ApplySpawnPayload(NetworkIdentity identity, Vector3 position, Quaternion rotation, Vector3 scale, ArraySegment<byte> payload, uint netId)
+        static void ApplySpawnPayload(NetworkIdentity identity, SpawnMessage msg)
         {
+            identity.Reset();
+            identity.pendingLocalPlayer = msg.isLocalPlayer;
+            identity.assetId = msg.assetId;
+
             if (!identity.gameObject.activeSelf)
             {
                 identity.gameObject.SetActive(true);
             }
 
             // apply local values for VR support
-            identity.transform.localPosition = position;
-            identity.transform.localRotation = rotation;
-            identity.transform.localScale = scale;
+            identity.transform.localPosition = msg.position;
+            identity.transform.localRotation = msg.rotation;
+            identity.transform.localScale = msg.scale;
 
             // deserialize components if any payload
             // (Count is 0 if there were no components)
-            if (payload.Count > 0)
+            if (msg.payload.Count > 0)
             {
-                NetworkReader payloadReader = new NetworkReader(payload);
+                NetworkReader payloadReader = new NetworkReader(msg.payload);
                 identity.OnUpdateVars(payloadReader, true);
             }
 
-            identity.netId = netId;
-            NetworkIdentity.spawned[netId] = identity;
+            identity.netId = msg.netId;
+            NetworkIdentity.spawned[msg.netId] = identity;
 
             // objects spawned as part of initial state are started on a second pass
             if (isSpawnFinished)
             {
                 identity.OnStartClient();
-                CheckForOwner(identity);
+                CheckForLocalPlayer(identity);
             }
         }
 
-        internal static void OnSpawnPrefab(NetworkConnection _, SpawnPrefabMessage msg)
+        internal static void OnSpawn(NetworkConnection _, SpawnMessage msg)
         {
-            if (msg.assetId == Guid.Empty)
+            if (msg.assetId == Guid.Empty && msg.sceneId == 0)
             {
                 Debug.LogError("OnObjSpawn netId: " + msg.netId + " has invalid asset Id");
                 return;
             }
-            if (LogFilter.Debug) Debug.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.assetId + " pos:" + msg.position + "]");
+            if (LogFilter.Debug) Debug.Log($"Client spawn handler instantiating netId={msg.netId} assetID={msg.assetId} sceneId={msg.sceneId} pos={msg.position}");
 
-            // owner?
-            if (msg.owner)
+            // is this supposed to be the local player?
+            if (msg.isLocalPlayer)
             {
-                OnSpawnMessageForOwner(msg.netId);
+                OnSpawnMessageForLocalPlayer(msg.netId);
             }
 
-            if (NetworkIdentity.spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
+            // was the object already spawned?
+            NetworkIdentity identity = GetExistingObject(msg.netId);
+
+            if (identity == null)
             {
-                // this object already exists (was in the scene), just apply the update to existing object
-                localObject.Reset();
-                ApplySpawnPayload(localObject, msg.position, msg.rotation, msg.scale, msg.payload, msg.netId);
+                identity = msg.sceneId == 0 ? SpawnPrefab(msg) : SpawnSceneObject(msg);
+            }
+
+            if (identity == null)
+            {
+                Debug.LogError($"Could not spawn assetId={msg.assetId} scene={msg.sceneId} netId={msg.netId}");
                 return;
             }
 
+            ApplySpawnPayload(identity, msg);
+        }
+
+        static NetworkIdentity GetExistingObject(uint netid)
+        {
+            NetworkIdentity.spawned.TryGetValue(netid, out NetworkIdentity localObject);
+            return localObject;
+        }
+
+        static NetworkIdentity SpawnPrefab(SpawnMessage msg)
+        {
             if (GetPrefab(msg.assetId, out GameObject prefab))
             {
                 GameObject obj = Object.Instantiate(prefab, msg.position, msg.rotation);
@@ -500,60 +521,24 @@ namespace Mirror
                     Debug.Log("Client spawn handler instantiating [netId:" + msg.netId + " asset ID:" + msg.assetId + " pos:" + msg.position + " rotation: " + msg.rotation + "]");
                 }
 
-                localObject = obj.GetComponent<NetworkIdentity>();
-                if (localObject == null)
-                {
-                    Debug.LogError("Client object spawned for " + msg.assetId + " does not have a NetworkIdentity");
-                    return;
-                }
-                localObject.Reset();
-                localObject.pendingOwner = msg.owner;
-                ApplySpawnPayload(localObject, msg.position, msg.rotation, msg.scale, msg.payload, msg.netId);
+                return obj.GetComponent<NetworkIdentity>();
             }
-            // lookup registered factory for type:
-            else if (spawnHandlers.TryGetValue(msg.assetId, out SpawnDelegate handler))
+            if (spawnHandlers.TryGetValue(msg.assetId, out SpawnDelegate handler))
             {
                 GameObject obj = handler(msg.position, msg.assetId);
                 if (obj == null)
                 {
                     Debug.LogWarning("Client spawn handler for " + msg.assetId + " returned null");
-                    return;
+                    return null;
                 }
-                localObject = obj.GetComponent<NetworkIdentity>();
-                if (localObject == null)
-                {
-                    Debug.LogError("Client object spawned for " + msg.assetId + " does not have a network identity");
-                    return;
-                }
-                localObject.Reset();
-                localObject.pendingOwner = msg.owner;
-                localObject.assetId = msg.assetId;
-                ApplySpawnPayload(localObject, msg.position, msg.rotation, msg.scale, msg.payload, msg.netId);
+                return obj.GetComponent<NetworkIdentity>();
             }
-            else
-            {
-                Debug.LogError("Failed to spawn server object, did you forget to add it to the NetworkManager? assetId=" + msg.assetId + " netId=" + msg.netId);
-            }
+            Debug.LogError("Failed to spawn server object, did you forget to add it to the NetworkManager? assetId=" + msg.assetId + " netId=" + msg.netId);
+            return null;
         }
 
-        internal static void OnSpawnSceneObject(NetworkConnection _, SpawnSceneObjectMessage msg)
+        static NetworkIdentity SpawnSceneObject(SpawnMessage msg)
         {
-            if (LogFilter.Debug) Debug.Log("Client spawn scene handler instantiating [netId:" + msg.netId + " sceneId:" + msg.sceneId + " pos:" + msg.position);
-
-            // owner?
-            if (msg.owner)
-            {
-                OnSpawnMessageForOwner(msg.netId);
-            }
-
-            if (NetworkIdentity.spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                // this object already exists (was in the scene)
-                localObject.Reset();
-                ApplySpawnPayload(localObject, msg.position, msg.rotation, msg.scale, msg.payload, msg.netId);
-                return;
-            }
-
             NetworkIdentity spawnedId = SpawnSceneObject(msg.sceneId);
             if (spawnedId == null)
             {
@@ -565,14 +550,10 @@ namespace Mirror
                     foreach (KeyValuePair<ulong, NetworkIdentity> kvp in spawnableObjects)
                         Debug.Log("Spawnable: SceneId=" + kvp.Key + " name=" + kvp.Value.name);
                 }
-
-                return;
             }
 
             if (LogFilter.Debug) Debug.Log("Client spawn for [netId:" + msg.netId + "] [sceneId:" + msg.sceneId + "] obj:" + spawnedId.gameObject.name);
-            spawnedId.Reset();
-            spawnedId.pendingOwner = msg.owner;
-            ApplySpawnPayload(spawnedId, msg.position, msg.rotation, msg.scale, msg.payload, msg.netId);
+            return spawnedId;
         }
 
         internal static void OnObjectSpawnStarted(NetworkConnection _, ObjectSpawnStartedMessage msg)
@@ -595,7 +576,7 @@ namespace Mirror
                 if (!identity.isClient)
                 {
                     identity.OnStartClient();
-                    CheckForOwner(identity);
+                    CheckForLocalPlayer(identity);
                 }
             }
             isSpawnFinished = true;
@@ -659,15 +640,7 @@ namespace Mirror
             }
         }
 
-        internal static void OnLocalClientSpawnPrefab(NetworkConnection _, SpawnPrefabMessage msg)
-        {
-            if (NetworkIdentity.spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
-            {
-                localObject.OnSetLocalVisibility(true);
-            }
-        }
-
-        internal static void OnLocalClientSpawnSceneObject(NetworkConnection _, SpawnSceneObjectMessage msg)
+        internal static void OnLocalClientSpawn(NetworkConnection _, SpawnMessage msg)
         {
             if (NetworkIdentity.spawned.TryGetValue(msg.netId, out NetworkIdentity localObject) && localObject != null)
             {
@@ -719,14 +692,14 @@ namespace Mirror
 
             if (NetworkIdentity.spawned.TryGetValue(msg.netId, out NetworkIdentity identity))
             {
-                identity.HandleClientAuthority(msg.authority);
+                identity.ForceAuthority(msg.authority);
             }
         }
 
-        // called for the one object in the spawn message which is the owner!
-        internal static void OnSpawnMessageForOwner(uint netId)
+        // called for the one object in the spawn message which is the local player!
+        internal static void OnSpawnMessageForLocalPlayer(uint netId)
         {
-            if (LogFilter.Debug) Debug.Log("ClientScene.OnOwnerMessage - connectionId=" + readyConnection.connectionId + " netId: " + netId);
+            if (LogFilter.Debug) Debug.Log("ClientScene.OnSpawnMessageForLocalPlayer - " + readyConnection + " netId: " + netId);
 
             // is there already an owner that is a different object??
             if (readyConnection.identity != null)
@@ -743,25 +716,20 @@ namespace Mirror
             }
         }
 
-        static void CheckForOwner(NetworkIdentity identity)
+        static void CheckForLocalPlayer(NetworkIdentity identity)
         {
-            if (identity.pendingOwner)
+            if (identity.pendingLocalPlayer)
             {
-                // found owner, turn into a local player
+                // supposed to be local player, so make it the local player!
 
                 // Set isLocalPlayer to true on this NetworkIdentity and trigger OnStartLocalPlayer in all scripts on the same GO
                 identity.connectionToServer = readyConnection;
                 identity.SetLocalPlayer();
 
                 if (LogFilter.Debug) Debug.Log("ClientScene.OnOwnerMessage - player=" + identity.name);
-                if (readyConnection.connectionId < 0)
-                {
-                    Debug.LogError("Owner message received on a local client.");
-                    return;
-                }
                 InternalAddPlayer(identity);
 
-                identity.pendingOwner = false;
+                identity.pendingLocalPlayer = false;
             }
         }
     }
