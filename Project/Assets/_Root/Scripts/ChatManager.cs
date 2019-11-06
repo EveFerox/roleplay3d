@@ -17,18 +17,18 @@ public class ChatManager : MonoBehaviour
     Vector2 _scroll;
 
     void Start()
-    { 
+    {
         NetworkServer.RegisterHandler((NetworkConnection conn, StringMessage msg) =>
         {
             Debug.Log($"Server Received '{msg.value}' from {conn.address}");
-            NetworkServer.SendToAll(msg);
+            NetworkServer.SendToAll(new ChatMessage{Sender = conn.address, Message = msg.value, Time = DateTime.UtcNow});
         });
 
-        NetworkClient.RegisterHandler((NetworkConnection conn, StringMessage msg) =>
+        NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
         {
-            Debug.Log($"Client Received '{msg.value}' from {conn.address}");
+            Debug.Log($"Client Received '{msg.Message}' from {msg.Sender}");
 
-            _messages.Add(new ChatMessage{Sender = conn, Message = msg.value, Time = DateTime.Now});
+            _messages.Add(msg);
 
             //Force scroll to bottom
             _scroll += Vector2.down * -500;
@@ -63,7 +63,7 @@ public class ChatManager : MonoBehaviour
         _scroll = GUILayout.BeginScrollView(_scroll);
 
         foreach (var m in _messages) {
-            GUILayout.Label($"[{m.Time.ToShortTimeString()}] {m.Sender.address}: {m.Message}");
+            GUILayout.Label(m.AsString());
         }
 
         GUILayout.EndScrollView();
