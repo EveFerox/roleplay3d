@@ -17,7 +17,7 @@ public class ChatManager : MonoBehaviour
     Vector2 _scroll;
 
     void Start()
-    {
+    { 
         NetworkServer.RegisterHandler((NetworkConnection conn, StringMessage msg) =>
         {
             Debug.Log($"Server Received '{msg.value}' from {conn.address}");
