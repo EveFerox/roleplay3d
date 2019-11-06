@@ -16,30 +16,44 @@ public class ChatManager : MonoBehaviour
 
     Vector2 _scroll;
 
-    void Start()
+    void Awake()
     {
-        NetworkServer.RegisterHandler((NetworkConnection conn, StringMessage msg) =>
+        NetworkManager.ServerConnected += (sender, connection) =>
         {
-            Debug.Log($"Server Received '{msg.value}' from {conn.address}");
-            NetworkServer.SendToAll(new ChatMessage{Sender = conn.address, Message = msg.value, Time = DateTime.UtcNow});
-        });
+            Debug.Log($"ServerConnected {connection.address}");
 
-        NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
+            NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
+            {
+                Debug.Log($"Server Received '{msg.Message}' from {conn.address}");
+                msg.Sender = conn.address;
+                msg.Time = DateTime.UtcNow;
+                NetworkServer.SendToAll(msg);
+            });
+        };
+        NetworkManager.ServerDisconnected += (sender, connection) =>
         {
-            Debug.Log($"Client Received '{msg.Message}' from {msg.Sender}");
+            Debug.Log($"ServerDisconnected {connection.address}");
+        };
 
-            _messages.Add(msg);
+        NetworkManager.ClientConnected += (sender, connection) =>
+        {
+            Debug.Log($"ClientConnected {connection.address}");
 
-            //Force scroll to bottom
-            _scroll += Vector2.down * -500;
-        });
+            NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
+            {
+                Debug.Log($"Client Received '{msg.Message}' from {msg.Sender}");
+
+                _messages.Add(msg);
+
+                //Force scroll to bottom
+                _scroll += Vector2.down * -500;
+            });
+        };
+        NetworkManager.ClientDisconnected += (sender, connection) =>
+        {
+            Debug.Log($"ClientDisconnected {connection.address}");
+        };
     }
-
-    //[Command]
-    //void CmdClientSend(string msg)
-    //{
-    //    Debug.Log($"ClientSend Received '{msg}");
-    //}
 
     void OnGUI()
     {
@@ -54,10 +68,7 @@ public class ChatManager : MonoBehaviour
         _message = GUILayout.TextArea(_message, 500);
         
         if (GUILayout.Button("Send")) {
-            NetworkClient.Send(new StringMessage(_message));
-        }
-        if (GUILayout.Button("Send 2")) {
-            //CmdClientSend(_message);
+            NetworkClient.Send(new ChatMessage{Message = _message});
         }
 
         _scroll = GUILayout.BeginScrollView(_scroll);
