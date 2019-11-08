@@ -6,12 +6,26 @@ using UnityEngine;
 
 public class NetworkManager : Mirror.NetworkManager
 {
+    public static event EventHandler StartedHost;
+    public static event EventHandler StopedHost;
+
     public static event EventHandler<NetworkConnection> ServerConnected;
     public static event EventHandler<NetworkConnection> ServerDisconnected;
 
     public static event EventHandler<NetworkConnection> ClientConnected;
     public static event EventHandler<NetworkConnection> ClientDisconnected;
     
+    public override void OnStartHost()
+    {
+        base.OnStartHost();
+        StartedHost?.Invoke(this, EventArgs.Empty);
+    }
+    public override void OnStopHost()
+    {
+        base.OnStopHost();
+        StopedHost?.Invoke(this, EventArgs.Empty);
+    }
+
     public override void OnServerConnect(NetworkConnection conn)
     {
         base.OnServerConnect(conn);

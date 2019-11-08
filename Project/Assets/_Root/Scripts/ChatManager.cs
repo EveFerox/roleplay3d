@@ -18,17 +18,27 @@ public class ChatManager : MonoBehaviour
 
     void Awake()
     {
-        NetworkManager.ServerConnected += (sender, connection) =>
+        NetworkManager.StartedHost += (sender, args) =>
         {
-            Debug.Log($"ServerConnected {connection.address}");
+            Debug.Log($"StartedHost");
 
             NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
             {
                 Debug.Log($"Server Received '{msg.Message}' from {conn.address}");
+
                 msg.Sender = conn.address;
                 msg.Time = DateTime.UtcNow;
                 NetworkServer.SendToAll(msg);
             });
+        };
+        NetworkManager.StopedHost += (sender, args) =>
+        {
+            Debug.Log($"StopedHost");
+        };
+
+        NetworkManager.ServerConnected += (sender, connection) =>
+        {
+            Debug.Log($"ServerConnected {connection.address}");
         };
         NetworkManager.ServerDisconnected += (sender, connection) =>
         {
@@ -38,6 +48,8 @@ public class ChatManager : MonoBehaviour
         NetworkManager.ClientConnected += (sender, connection) =>
         {
             Debug.Log($"ClientConnected {connection.address}");
+
+            _messages.Clear();
 
             NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
             {
@@ -57,7 +69,8 @@ public class ChatManager : MonoBehaviour
 
     void OnGUI()
     {
-        _windowChatRect = GUI.Window(500, _windowChatRect, WindowChatFunc, "Chat");
+        if (NetworkClient.isConnected)
+            _windowChatRect = GUI.Window(500, _windowChatRect, WindowChatFunc, "Chat");
     }
 
     void WindowChatFunc(int id)
@@ -68,7 +81,17 @@ public class ChatManager : MonoBehaviour
         _message = GUILayout.TextArea(_message, 500);
         
         if (GUILayout.Button("Send")) {
-            NetworkClient.Send(new ChatMessage{Message = _message});
+            NetworkClient.Send(new ChatMessage { Message = _message });
+        }
+
+        if (NetworkServer.active && GUILayout.Button("Send As Server")) {
+            var msg = new ChatMessage
+            {
+                Message = _message, 
+                Sender = "SERVER",
+                Time = DateTime.UtcNow
+            };
+            NetworkServer.SendToAll(msg);
         }
 
         _scroll = GUILayout.BeginScrollView(_scroll);
