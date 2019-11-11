@@ -6,15 +6,23 @@ using UnityEngine;
 
 public class ChatManager : MonoBehaviour
 {
-    [SerializeField]
-    string _message = "MESSAGE!!!";
+    public event EventHandler<bool> CanSendChange;
+    public event EventHandler<ChatMessage> MessageReceived;
 
-    [SerializeField]
-    Rect _windowChatRect = new Rect(250, 250, 500, 300);
+    bool _canSend;
+    public bool CanSend
+    {
+        get => _canSend;
+        set
+        {
+            if (_canSend == value) return;
+            _canSend = value; 
+            CanSendChange?.Invoke(this, value);
+        }
+    }
 
     readonly List<ChatMessage> _messages = new List<ChatMessage>();
-
-    Vector2 _scroll;
+    public IReadOnlyList<ChatMessage> Messages => _messages;
 
     void Awake()
     {
@@ -34,15 +42,21 @@ public class ChatManager : MonoBehaviour
         NetworkManager.StopedHost += (sender, args) =>
         {
             Debug.Log($"StopedHost");
+
+            CanSend = false;
         };
 
         NetworkManager.ServerConnected += (sender, connection) =>
         {
             Debug.Log($"ServerConnected {connection.address}");
+
+            SendAsSever($"{connection.address} connected");
         };
         NetworkManager.ServerDisconnected += (sender, connection) =>
         {
             Debug.Log($"ServerDisconnected {connection.address}");
+
+            SendAsSever($"{connection.address} disconnected");
         };
 
         NetworkManager.ClientConnected += (sender, connection) =>
@@ -50,56 +64,43 @@ public class ChatManager : MonoBehaviour
             Debug.Log($"ClientConnected {connection.address}");
 
             _messages.Clear();
+            CanSend = true;
 
             NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
             {
                 Debug.Log($"Client Received '{msg.Message}' from {msg.Sender}");
 
-                _messages.Add(msg);
+                MessageReceived?.Invoke(this, msg);
 
-                //Force scroll to bottom
-                _scroll += Vector2.down * -500;
+                _messages.Add(msg);
             });
         };
         NetworkManager.ClientDisconnected += (sender, connection) =>
         {
             Debug.Log($"ClientDisconnected {connection.address}");
+
+            CanSend = false;
         };
     }
 
-    void OnGUI()
+    public void Send(string text)
     {
-        if (NetworkClient.isConnected)
-            _windowChatRect = GUI.Window(500, _windowChatRect, WindowChatFunc, "Chat");
+        NetworkClient.Send(new ChatMessage { Message = text });
     }
 
-    void WindowChatFunc(int id)
+    public void SendAsSever(string text)
     {
-        GUI.DragWindow(new Rect(0, 0, 10000, 20));
-
-        GUILayout.Label("Message:");
-        _message = GUILayout.TextArea(_message, 500);
-        
-        if (GUILayout.Button("Send")) {
-            NetworkClient.Send(new ChatMessage { Message = _message });
+        if (NetworkServer.active == false) {
+            Debug.LogError("NetworkServer.active==false", this);
+            return;
         }
 
-        if (NetworkServer.active && GUILayout.Button("Send As Server")) {
-            var msg = new ChatMessage
-            {
-                Message = _message, 
-                Sender = "SERVER",
-                Time = DateTime.UtcNow
-            };
-            NetworkServer.SendToAll(msg);
-        }
-
-        _scroll = GUILayout.BeginScrollView(_scroll);
-
-        foreach (var m in _messages) {
-            GUILayout.Label(m.AsString());
-        }
-
-        GUILayout.EndScrollView();
+        var msg = new ChatMessage
+        {
+            Message = text, 
+            Sender = "SERVER",
+            Time = DateTime.UtcNow
+        };
+        NetworkServer.SendToAll(msg);
     }
 }
