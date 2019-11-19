@@ -20,10 +20,22 @@ public class UserManager : MonoBehaviour
     {
         if (conn.isAuthenticated && conn.authenticationData is string username)
         {
-            var user = new User(username) { Connection = conn };
-            DataBase.Add(username, user);
-            user.OnDisconnect += (s, e) => DataBase.Remove(user.Username);
-            return user;
+            if (DataBase.TryGetValue(username, out var user))
+            {
+                if (user.Connection == null)
+                {
+                    user.Connection = conn;
+                    return user;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            var newUser = new User(username) { Connection = conn };
+            DataBase.Add(username, newUser);
+            newUser.OnDisconnect += (s, e) => newUser.Connection = null;
+            return newUser;
         }
         return null;
     }
