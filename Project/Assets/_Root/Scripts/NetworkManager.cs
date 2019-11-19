@@ -29,11 +29,12 @@ public class NetworkManager : Mirror.NetworkManager
     {
         base.OnStartHost();
 
+        channels.OnServerStarted();
+
         NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
         {
             channels.HandleMessage(users.GetUser(conn), msg);
         });
-
 
         StartedHost?.Invoke(this, EventArgs.Empty);
     }
@@ -41,6 +42,8 @@ public class NetworkManager : Mirror.NetworkManager
     {
         base.OnStopHost();
         StopedHost?.Invoke(this, EventArgs.Empty);
+        users.Clear();
+        channels.Clear();
     }
 
     public override void OnServerConnect(NetworkConnection conn)

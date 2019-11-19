@@ -7,10 +7,11 @@ public class ChannelManager : MonoBehaviour
 
     private ChannelFeed globalFeed;
 
-    private void Awake()
+    public void OnServerStarted()
     {
         globalFeed = CreateChannel("Global");
     }
+
 
     public ChannelFeed CreateChannel(string name)
     {
@@ -28,22 +29,41 @@ public class ChannelManager : MonoBehaviour
 
     public void HandleMessage(User user, ChatMessage msg)
     {
-        if (msg.Message.Length == 0) return; 
+        if (msg.Message.Length == 0)
+        {
+            return;
+        }
         if (Channels.TryGetValue(msg.Channel, out var channel))
         {
-            if (msg.Message[0] == '/') channel.Control(user, msg.Message.Substring(1));
+            if (msg.Message[0] == '/')
+            {
+                channel.Control(user, msg.Message.Substring(1));
+            }
             channel.SendChat(user, msg);
         }
         else if (msg.Message.IndexOf("/create ") == 0)
         {
             var c = CreateChannel(msg.Message.Substring(8));
-            c.Subscribe(user);
+            if (c != null)
+            {
+                c.Subscribe(user);
+            }
+        }
+        else if (msg.Message.IndexOf("/logoff") == 0)
+        {
+            user.Connection.Disconnect();
         }
     }
 
     public void SubscribeToGlobal(User user)
     {
         globalFeed.Subscribe(user);
+    }
+
+    public void Clear()
+    {
+        Channels.Clear();
+        globalFeed = null;
     }
 }
 

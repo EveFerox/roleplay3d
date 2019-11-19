@@ -17,13 +17,18 @@ public class uiLogin : MonoBehaviour
     [SerializeField]
     public GameObject _network;
 
-
     [SerializeField]
     public GameObject _onlogin;
+
+    [SerializeField]
+    public Button _register;
 
 
     private SimpleAuthenticator auth;
 
+    private bool validUsername = false;
+    private bool validPassword = false;
+    private bool validPasswordRegister = false;
 
     private void Awake()
     {
@@ -33,6 +38,30 @@ public class uiLogin : MonoBehaviour
 
         _password.contentType = InputField.ContentType.Password;
         _passwordRegister.contentType = InputField.ContentType.Password;
+
+        _register.enabled = false;
+
+        _username.onValueChanged.AddListener(str =>
+        {
+            validUsername = auth.ValidateUsername(str);
+            _username.textComponent.color = validUsername ? Color.white : Color.red;
+        });
+
+        _passwordRegister.onValueChanged.AddListener(str =>
+        {
+            validPasswordRegister = validPassword && _passwordRegister.text == _password.text;
+            _passwordRegister.textComponent.color = validPasswordRegister ? Color.white : Color.red;
+            _register.enabled = validPasswordRegister;
+        });
+
+        _password.onValueChanged.AddListener(str =>
+        {
+            validPassword = _password.text.Length > 2;
+            validPasswordRegister = validPassword && _passwordRegister.text == _password.text;
+            _password.textComponent.color = validPassword ? Color.white : Color.red;
+            _passwordRegister.textComponent.color = validPasswordRegister ? Color.white : Color.red;
+            _register.enabled = validPasswordRegister;
+        });
     }
 
     private void Auth_OnAuthSuccess(object sender, System.EventArgs e)

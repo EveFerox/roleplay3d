@@ -9,8 +9,13 @@ public class ChannelFeed : MonoBehaviour
     private readonly HashSet<User> Users = new HashSet<User>();
     private readonly List<ChatMessage> ChatLog = new List<ChatMessage>();
 
+    public event EventHandler Removed;
+
     public string Name { get; set; }
     public bool SaveMessages { get; set; } = true;
+
+    public float RemoveTimer { get; set; } = 3600;
+
 
     protected virtual bool CanSubscribe(User conn)
     {
@@ -26,12 +31,20 @@ public class ChannelFeed : MonoBehaviour
     {
         Users.Remove(user);
         SendInfo($"{user.Username} disconnected");
+        if (Users.Count == 0) Invoke(nameof(RemoveChannelSelf), RemoveTimer);
     }
 
     protected virtual void OnUnsubscribe(User user)
     {
         SendInfo($"{user.Username} left");
         Users.Remove(user);
+        if (Users.Count == 0) Invoke(nameof(RemoveChannelSelf), RemoveTimer);
+    }
+
+    protected virtual void OnRemoveChannel()
+    {
+        SendInfo($"channel removed");
+        Removed?.Invoke(this, EventArgs.Empty);
     }
 
     protected virtual bool CanSendMessage(User user)
@@ -51,7 +64,6 @@ public class ChannelFeed : MonoBehaviour
                 {
                     Subscribe(user);
                 }
-
                 break;
         }
     }
@@ -68,12 +80,23 @@ public class ChannelFeed : MonoBehaviour
             Users.Add(user);
             OnSubscribe(user);
             user.OnDisconnect += (s, e) => { OnDisconnect(user); };
+            CancelInvoke(nameof(RemoveChannelSelf));
         }
     }
 
     public void Unsubscribe(User user)
     {
         OnUnsubscribe(user);
+    }
+
+    public void RemoveChannel()
+    {
+        OnRemoveChannel();
+    }
+
+    private void RemoveChannelSelf()
+    {
+        if (Users.Count == 0) OnRemoveChannel();
     }
 
     protected bool SendToAll<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase

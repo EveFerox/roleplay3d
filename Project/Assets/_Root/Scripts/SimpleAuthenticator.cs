@@ -15,7 +15,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
     private ChannelManager channels;
 
     [SerializeField]
-    private string usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{3,19}$";
+    private string usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
 
     public event EventHandler OnAuthSuccess;
 
@@ -25,7 +25,6 @@ public class SimpleAuthenticator : NetworkAuthenticator
         channels = GetComponent<ChannelManager>();
     }
 
-    [Client]
     public bool SetNextActionLogin(string username, string password)
     {
         if (!ValidateUsername(username)) return false;
@@ -33,7 +32,6 @@ public class SimpleAuthenticator : NetworkAuthenticator
         return true;
     }
 
-    [Client]
     public bool SetNextActionRegister(string username, string password, string password2)
     {
         if (!ValidateUsername(username)) return false;
@@ -72,7 +70,6 @@ public class SimpleAuthenticator : NetworkAuthenticator
         authMessage = null;
     }
 
-    [Server]
     private void OnLoginRequestMessage(NetworkConnection conn, LoginRequestMessage req)
     {
         Debug.LogFormat("Login Request: {0} {1}", req.Username, req.Password);
@@ -99,12 +96,11 @@ public class SimpleAuthenticator : NetworkAuthenticator
         }
     }
 
-    private bool ValidateUsername(string username)
+    public bool ValidateUsername(string username)
     {
         return username != null && Regex.IsMatch(username, usernameRegex);
     }
 
-    [Server]
     private void AuthConnection(NetworkConnection conn, bool success, string token = null)
     {
         if (success)
@@ -141,7 +137,6 @@ public class SimpleAuthenticator : NetworkAuthenticator
         }
     }
 
-    [Client]
     private void OnAuthenticationResponseMessage(NetworkConnection conn, AuthenticationResponseMessage res)
     {
         if (res.Success)

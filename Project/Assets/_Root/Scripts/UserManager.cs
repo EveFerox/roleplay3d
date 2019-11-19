@@ -39,6 +39,14 @@ public class UserManager : MonoBehaviour
         }
         return null;
     }
+
+    public void Clear()
+    {
+        foreach (var user in DataBase.Values)
+        {
+            user.Connection = null;
+        }
+    }
 }
 
 public class User
