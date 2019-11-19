@@ -17,7 +17,7 @@ namespace UI
         {
             _msg = msg;
 
-            _message.text = $"[{_msg.Time.ToShortTimeString()}] {_msg.Sender}: {_msg.Message}";
+            _message.text = msg.AsString();
         }
     }
 }

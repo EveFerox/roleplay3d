@@ -47,7 +47,11 @@ public class ChannelFeed : MonoBehaviour
                 Unsubscribe(user);
                 break;
             case "join":
-                if (CanSubscribe(user)) Subscribe(user);
+                if (CanSubscribe(user))
+                {
+                    Subscribe(user);
+                }
+
                 break;
         }
     }
@@ -88,12 +92,16 @@ public class ChannelFeed : MonoBehaviour
 
     public void SendChat(User user, ChatMessage msg)
     {
-        if (!CanSendMessage(user)) return;
+        if (!CanSendMessage(user)) { return; }
         msg.Sender = user.Username;
         msg.Channel = Name;
         msg.Time = DateTime.UtcNow;
         SendToAll(msg);
-        if (!Users.Contains(user)) user.Connection.Send(msg);
+        if (!Users.Contains(user))
+        {
+            msg.Sender = "#";
+            user.Connection.Send(msg);
+        }
     }
 
     protected void SendInfo(string msg)
