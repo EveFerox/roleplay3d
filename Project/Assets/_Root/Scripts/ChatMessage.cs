@@ -4,33 +4,26 @@ using System.Collections;
 using Mirror;
 using Newtonsoft.Json;
 
-public struct ChatMessage : IMessageBase
+public class ChatMessage : DefaultMessageBase
 {
     public string Sender { get; set; }
+    public string Channel { get; set; }
     public string Message { get; set; }
     public DateTime Time { get; set; }
 
     public string AsString()
     {
-        return $"[{Time.ToShortTimeString()}] {Sender}: {Message}";
+        return $"[{Time.ToShortTimeString()} - {Channel}] {Sender}: {Message}";
     }
 
-    public void Copy(ChatMessage other)
+    protected override void CopyFrom(object obj)
     {
-        Sender = other.Sender;
-        Message = other.Message;
-        Time = other.Time;
-    }
-    
-    public void Deserialize(NetworkReader reader)
-    {
-        var str = reader.ReadString();
-        var other = JsonConvert.DeserializeObject<ChatMessage>(str);
-        Copy(other);
-    }
-    public void Serialize(NetworkWriter writer)
-    {
-        var json = JsonConvert.SerializeObject(this);
-        writer.WriteString(json);
+        if (obj is ChatMessage v)
+        {
+            Sender = v.Sender;
+            Channel = v.Channel;
+            Message = v.Message;
+            Time = v.Time;
+        }
     }
 }

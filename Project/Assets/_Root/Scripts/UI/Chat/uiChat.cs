@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,43 +7,45 @@ namespace UI
     public class uiChat : MonoBehaviour
     {
         [SerializeField]
-        uiChatItem _itemPrefab;
+        private uiChatItem _itemPrefab;
 
         [SerializeField]
-        InputField _inputField;
+        private InputField _inputField;
 
         [SerializeField]
-        ScrollRect _scroll;
+        private ScrollRect _scroll;
 
-        ChatManager _manager;
+        private string mainChannel = "Global";
+        private ChatManager _manager;
+        private readonly List<uiChatItem> _chatItems = new List<uiChatItem>();
 
-        readonly List<uiChatItem> _chatItems = new List<uiChatItem>();
-
-        void Awake()
+        private void Awake()
         {
             _manager = FindObjectOfType<ChatManager>();
 
-            if (_manager == null) {
+            if (_manager == null)
+            {
                 Debug.LogError("Failed to find ChatManager", this);
                 return;
             }
-            
+
             _manager.CanSendChange += Manager_CanSendChange;
             _manager.MessageReceived += Manager_MessageReceived;
 
             Manager_CanSendChange(_manager, _manager.CanSend);
         }
 
-        void Manager_CanSendChange(object sender, bool canSend)
+        private void Manager_CanSendChange(object sender, bool canSend)
         {
-            if (canSend == false) {
+            if (canSend == false)
+            {
                 ClearMessages();
             }
 
             gameObject.SetActive(canSend);
         }
 
-        void Manager_MessageReceived(object sender, ChatMessage e)
+        private void Manager_MessageReceived(object sender, ChatMessage e)
         {
             var item = Instantiate(_itemPrefab, _scroll.content);
             item.Init(e);
@@ -52,9 +53,10 @@ namespace UI
             _chatItems.Add(item);
         }
 
-        void ClearMessages()
+        private void ClearMessages()
         {
-            foreach (var i in _chatItems) {
+            foreach (var i in _chatItems)
+            {
                 Destroy(i.gameObject);
             }
 
@@ -63,8 +65,14 @@ namespace UI
 
         public void UI_Send()
         {
-            _manager.Send(_inputField.text);
-
+            if (_inputField.text.IndexOf("/set ") == 0)
+            {
+                mainChannel = _inputField.text.Substring(5);
+            }
+            else
+            {
+                _manager.Send(_inputField.text, mainChannel);
+            }
             _inputField.text = "";
         }
     }

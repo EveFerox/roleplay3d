@@ -29,34 +29,20 @@ public class ChatManager : MonoBehaviour
         NetworkManager.StartedHost += (sender, args) =>
         {
             Debug.Log($"StartedHost");
-
-            NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
-            {
-                Debug.Log($"Server Received '{msg.Message}' from {conn.address}");
-
-                msg.Sender = conn.address;
-                msg.Time = DateTime.UtcNow;
-                NetworkServer.SendToAll(msg);
-            });
         };
         NetworkManager.StopedHost += (sender, args) =>
         {
             Debug.Log($"StopedHost");
-
             CanSend = false;
         };
 
         NetworkManager.ServerConnected += (sender, connection) =>
         {
             Debug.Log($"ServerConnected {connection.address}");
-
-            SendAsSever($"{connection.address} connected");
         };
         NetworkManager.ServerDisconnected += (sender, connection) =>
         {
             Debug.Log($"ServerDisconnected {connection.address}");
-
-            SendAsSever($"{connection.address} disconnected");
         };
 
         NetworkManager.ClientConnected += (sender, connection) =>
@@ -69,9 +55,9 @@ public class ChatManager : MonoBehaviour
             NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
             {
                 Debug.Log($"Client Received '{msg.Message}' from {msg.Sender}");
-
+            
                 MessageReceived?.Invoke(this, msg);
-
+            
                 _messages.Add(msg);
             });
         };
@@ -83,9 +69,9 @@ public class ChatManager : MonoBehaviour
         };
     }
 
-    public void Send(string text)
+    public void Send(string text, string channel)
     {
-        NetworkClient.Send(new ChatMessage { Message = text });
+        NetworkClient.Send(new ChatMessage { Message = text, Channel = channel });
     }
 
     public void SendAsSever(string text)

@@ -9,6 +9,8 @@ public class InputFieldExtension : MonoBehaviour
     bool _isRefocusOnSubmit = true;
 
     public UnityEvent Submit;
+
+    public Selectable TabSelect;
     
     bool _isPrevFrameFocus = false;
     InputField _inputField;
@@ -26,6 +28,12 @@ public class InputFieldExtension : MonoBehaviour
 
             if (_isRefocusOnSubmit) 
                 Focus();
+        }
+
+        if (_isPrevFrameFocus && TabSelect != null && Input.GetKey(KeyCode.Tab))
+        {
+            TabSelect.Select();
+            if (TabSelect is InputField field) field.ActivateInputField();
         }
 
         _isPrevFrameFocus = _inputField.isFocused;

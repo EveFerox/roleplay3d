@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Mirror;
+﻿using Mirror;
+using System;
 using UnityEngine;
 
+[RequireComponent(typeof(UserManager)),
+ RequireComponent(typeof(ChannelManager))]
 public class NetworkManager : Mirror.NetworkManager
 {
     public static event EventHandler StartedHost;
@@ -14,10 +14,27 @@ public class NetworkManager : Mirror.NetworkManager
 
     public static event EventHandler<NetworkConnection> ClientConnected;
     public static event EventHandler<NetworkConnection> ClientDisconnected;
-    
+
+    private UserManager users;
+    private ChannelManager channels; 
+
+    public override void Awake()
+    {
+        base.Awake();
+        users = GetComponent<UserManager>();
+        channels = GetComponent<ChannelManager>();
+    }
+
     public override void OnStartHost()
     {
         base.OnStartHost();
+
+        NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
+        {
+            channels.HandleMessage(users.GetUser(conn), msg);
+        });
+
+
         StartedHost?.Invoke(this, EventArgs.Empty);
     }
     public override void OnStopHost()
@@ -46,6 +63,7 @@ public class NetworkManager : Mirror.NetworkManager
 
     public override void OnClientDisconnect(NetworkConnection conn)
     {
+        users.GetUser(conn)?.DisconnectedInternal();
         base.OnClientDisconnect(conn);
         ClientDisconnected?.Invoke(this, conn);
     }
