@@ -34,3 +34,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# TEMP
+/Project/Assets/_Root/Prefabs/v3/v3.fbx
