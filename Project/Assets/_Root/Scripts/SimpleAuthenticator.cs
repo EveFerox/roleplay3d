@@ -7,15 +7,15 @@ using UnityEngine;
 [RequireComponent(typeof(UserManager))]
 public class SimpleAuthenticator : NetworkAuthenticator
 {
-    private readonly Dictionary<string, string> DataBase = new Dictionary<string, string>();
+    readonly Dictionary<string, string> DataBase = new Dictionary<string, string>();
 
-    private IMessageBase authMessage;
+    IMessageBase authMessage;
 
-    private UserManager users;
-    private ChannelManager channels;
+    UserManager users;
+    ChannelManager channels;
 
     [SerializeField]
-    private string usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
+    string usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
 
     public event EventHandler OnAuthSuccess;
 
@@ -70,7 +70,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
         authMessage = null;
     }
 
-    private void OnLoginRequestMessage(NetworkConnection conn, LoginRequestMessage req)
+    void OnLoginRequestMessage(NetworkConnection conn, LoginRequestMessage req)
     {
         Debug.LogFormat("Login Request: {0} {1}", req.Username, req.Password);
 
@@ -81,7 +81,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
     }
 
     [Server]
-    private void OnRegisterRequestMessage(NetworkConnection conn, RegisterRequestMessage req)
+    void OnRegisterRequestMessage(NetworkConnection conn, RegisterRequestMessage req)
     {
         Debug.LogFormat("Register Request: {0} {1}", req.Username ?? "", req.Password ?? "");
 
@@ -101,7 +101,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
         return username != null && Regex.IsMatch(username, usernameRegex);
     }
 
-    private void AuthConnection(NetworkConnection conn, bool success, string token = null)
+    void AuthConnection(NetworkConnection conn, bool success, string token = null)
     {
         if (success)
         {
@@ -137,7 +137,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
         }
     }
 
-    private void OnAuthenticationResponseMessage(NetworkConnection conn, AuthenticationResponseMessage res)
+    void OnAuthenticationResponseMessage(NetworkConnection conn, AuthenticationResponseMessage res)
     {
         if (res.Success)
         {

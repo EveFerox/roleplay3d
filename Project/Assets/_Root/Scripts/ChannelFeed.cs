@@ -1,55 +1,55 @@
 ﻿using Mirror;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
-
-public class ChannelFeed : MonoBehaviour
+public class ChannelFeed
 {
-    private readonly HashSet<User> Users = new HashSet<User>();
-    private readonly List<ChatMessage> ChatLog = new List<ChatMessage>();
+    public event EventHandler<UserChangeInfo> UserChanged;
 
     public event EventHandler Removed;
+
+    readonly HashSet<User> Users = new HashSet<User>();
+    readonly List<ChatMessage> ChatLog = new List<ChatMessage>();
 
     public string Name { get; set; }
     public bool SaveMessages { get; set; } = true;
 
-    public float RemoveTimer { get; set; } = 3600;
-
-
-    protected virtual bool CanSubscribe(User conn)
+    protected virtual bool CanSubscribe(User user)
     {
-        return !IsSubscribed(conn);
+        return !IsSubscribed(user);
     }
 
     protected virtual void OnSubscribe(User user)
     {
+        Users.Add(user);
+        user.OnDisconnect += (s, e) => { OnDisconnect(user); };
+        UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Subscribed));
         SendInfo($"{user.Username} connected");
     }
 
     protected virtual void OnDisconnect(User user)
     {
         Users.Remove(user);
+        UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Disconnected));
         SendInfo($"{user.Username} disconnected");
-        if (Users.Count == 0) Invoke(nameof(RemoveChannelSelf), RemoveTimer);
     }
 
     protected virtual void OnUnsubscribe(User user)
     {
-        SendInfo($"{user.Username} left");
         Users.Remove(user);
-        if (Users.Count == 0) Invoke(nameof(RemoveChannelSelf), RemoveTimer);
+        UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Unsubscribed));
+        SendInfo($"{user.Username} left");
     }
 
     protected virtual void OnRemoveChannel()
     {
-        SendInfo($"channel removed");
+        SendInfo($"channel '{Name}' removed");
         Removed?.Invoke(this, EventArgs.Empty);
     }
 
     protected virtual bool CanSendMessage(User user)
     {
-        return true;
+        return IsSubscribed(user);
     }
 
     public virtual void Control(User user, string message)
@@ -75,13 +75,9 @@ public class ChannelFeed : MonoBehaviour
 
     public void Subscribe(User user)
     {
-        if (CanSubscribe(user))
-        {
-            Users.Add(user);
-            OnSubscribe(user);
-            user.OnDisconnect += (s, e) => { OnDisconnect(user); };
-            CancelInvoke(nameof(RemoveChannelSelf));
-        }
+        if (CanSubscribe(user) == false) return;
+
+        OnSubscribe(user);
     }
 
     public void Unsubscribe(User user)
@@ -94,12 +90,8 @@ public class ChannelFeed : MonoBehaviour
         OnRemoveChannel();
     }
 
-    private void RemoveChannelSelf()
-    {
-        if (Users.Count == 0) OnRemoveChannel();
-    }
-
-    protected bool SendToAll<T>(T msg, int channelId = Channels.DefaultReliable) where T : IMessageBase
+    protected bool SendToAll<T>(T msg, int channelId = Channels.DefaultReliable) 
+        where T : IMessageBase
     {
         var result = true;
         if (SaveMessages && msg is ChatMessage chat)
@@ -116,6 +108,7 @@ public class ChannelFeed : MonoBehaviour
     public void SendChat(User user, ChatMessage msg)
     {
         if (!CanSendMessage(user)) { return; }
+
         msg.Sender = user.Username;
         msg.Channel = Name;
         msg.Time = DateTime.UtcNow;
@@ -136,5 +129,26 @@ public class ChannelFeed : MonoBehaviour
             Time = DateTime.UtcNow,
             Message = msg
         });
+    }
+
+    public enum UserChangeE
+    {
+        Subscribed,
+        Unsubscribed,
+        Disconnected
+    }
+
+    public class UserChangeInfo
+    {
+        public ChannelFeed Channel { get; }
+        public User User { get; }
+        public UserChangeE Change { get; }
+
+        public UserChangeInfo(ChannelFeed channel, User user, UserChangeE change)
+        {
+            Channel = channel;
+            User = user;
+            Change = change;
+        }
     }
 }

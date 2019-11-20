@@ -1,33 +1,46 @@
 ﻿using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-public class ChannelManager : MonoBehaviour
+public class ChannelManager : StaticMonoBehaviour<ChannelManager>
 {
-    private readonly Dictionary<string, ChannelFeed> Channels = new Dictionary<string, ChannelFeed>();
+    readonly Dictionary<string, ChannelFeed> Channels = new Dictionary<string, ChannelFeed>();
 
-    private ChannelFeed globalFeed;
+    ChannelFeed _globalFeed;
 
-    public void OnServerStarted()
+    protected override void Awake()
     {
-        globalFeed = CreateChannel("Global");
-    }
+        base.Awake();
 
+        NetworkManager.StartedHost += (sender, args) =>
+        {
+            _globalFeed = CreateChannel("Global");
+
+            NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
+            {
+                HandleMessage(UserManager.GetUser(conn), msg);
+            });
+        };
+        NetworkManager.StopedHost += (sender, args) =>
+        {
+            Clear();
+        };
+    }
 
     public ChannelFeed CreateChannel(string name)
     {
-        if (Channels.ContainsKey(name))
-        {
+        if (Channels.ContainsKey(name)) {
+            Debug.Log($"Channel {name} already exists");
             return null;
         }
 
-        var channel = gameObject.AddComponent<ChannelFeed>();
-        channel.Name = name;
+        var channel = new ChannelFeed {Name = name};
         Channels.Add(name, channel);
 
         return channel;
     }
 
-    public void HandleMessage(User user, ChatMessage msg)
+    void HandleMessage(User user, ChatMessage msg)
     {
         if (msg.Message.Length == 0)
         {
@@ -57,13 +70,13 @@ public class ChannelManager : MonoBehaviour
 
     public void SubscribeToGlobal(User user)
     {
-        globalFeed.Subscribe(user);
+        _globalFeed.Subscribe(user);
     }
 
     public void Clear()
     {
         Channels.Clear();
-        globalFeed = null;
+        _globalFeed = null;
     }
 }
 

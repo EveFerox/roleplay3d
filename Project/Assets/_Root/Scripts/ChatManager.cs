@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
-public class ChatManager : MonoBehaviour
+public class ChatManager : StaticMonoBehaviour<ChatManager>
 {
     public event EventHandler<bool> CanSendChange;
     public event EventHandler<ChatMessage> MessageReceived;
@@ -24,38 +24,22 @@ public class ChatManager : MonoBehaviour
     readonly List<ChatMessage> _messages = new List<ChatMessage>();
     public IReadOnlyList<ChatMessage> Messages => _messages;
 
-    void Awake()
+    protected override void Awake()
     {
-        NetworkManager.StartedHost += (sender, args) =>
-        {
-            Debug.Log($"StartedHost");
-        };
+        base.Awake();
+
         NetworkManager.StopedHost += (sender, args) =>
         {
-            Debug.Log($"StopedHost");
             CanSend = false;
-        };
-
-        NetworkManager.ServerConnected += (sender, connection) =>
-        {
-            Debug.Log($"ServerConnected {connection.address}");
-        };
-        NetworkManager.ServerDisconnected += (sender, connection) =>
-        {
-            Debug.Log($"ServerDisconnected {connection.address}");
         };
 
         NetworkManager.ClientConnected += (sender, connection) =>
         {
-            Debug.Log($"ClientConnected {connection.address}");
-
             _messages.Clear();
             CanSend = true;
 
             NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
             {
-                Debug.Log($"Client Received '{msg.Message}' from {msg.Sender}");
-            
                 MessageReceived?.Invoke(this, msg);
             
                 _messages.Add(msg);
@@ -63,8 +47,6 @@ public class ChatManager : MonoBehaviour
         };
         NetworkManager.ClientDisconnected += (sender, connection) =>
         {
-            Debug.Log($"ClientDisconnected {connection.address}");
-
             CanSend = false;
         };
     }

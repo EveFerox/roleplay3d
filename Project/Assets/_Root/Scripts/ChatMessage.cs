@@ -18,12 +18,13 @@ public class ChatMessage : DefaultMessageBase
 
     protected override void CopyFrom(object obj)
     {
-        if (obj is ChatMessage v)
-        {
+        if (obj is ChatMessage v) {
             Sender = v.Sender;
             Channel = v.Channel;
             Message = v.Message;
             Time = v.Time;
+        } else {
+            Debug.LogWarning("Trying to CopyFrom not ChatMessage");
         }
     }
 }

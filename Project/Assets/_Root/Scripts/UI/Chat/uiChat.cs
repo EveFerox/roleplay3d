@@ -7,24 +7,23 @@ namespace UI
     public class uiChat : MonoBehaviour
     {
         [SerializeField]
-        private uiChatItem _itemPrefab;
+        uiChatItem _itemPrefab;
 
         [SerializeField]
-        private InputField _inputField;
+        InputField _inputField;
 
         [SerializeField]
-        private ScrollRect _scroll;
+        ScrollRect _scroll;
 
-        private string mainChannel = "Global";
-        private ChatManager _manager;
-        private readonly List<uiChatItem> _chatItems = new List<uiChatItem>();
+        string _currentChannel = "Global";
+        ChatManager _manager;
+        readonly List<uiChatItem> _chatItems = new List<uiChatItem>();
 
-        private void Awake()
+        void Awake()
         {
             _manager = FindObjectOfType<ChatManager>();
 
-            if (_manager == null)
-            {
+            if (_manager == null) {
                 Debug.LogError("Failed to find ChatManager", this);
                 return;
             }
@@ -35,17 +34,16 @@ namespace UI
             Manager_CanSendChange(_manager, _manager.CanSend);
         }
 
-        private void Manager_CanSendChange(object sender, bool canSend)
+        void Manager_CanSendChange(object sender, bool canSend)
         {
-            if (canSend == false)
-            {
+            if (canSend == false) {
                 ClearMessages();
             }
 
             gameObject.SetActive(canSend);
         }
 
-        private void Manager_MessageReceived(object sender, ChatMessage e)
+        void Manager_MessageReceived(object sender, ChatMessage e)
         {
             var item = Instantiate(_itemPrefab, _scroll.content);
             item.Init(e);
@@ -53,10 +51,9 @@ namespace UI
             _chatItems.Add(item);
         }
 
-        private void ClearMessages()
+        void ClearMessages()
         {
-            foreach (var i in _chatItems)
-            {
+            foreach (var i in _chatItems) {
                 Destroy(i.gameObject);
             }
 
@@ -65,13 +62,10 @@ namespace UI
 
         public void UI_Send()
         {
-            if (_inputField.text.IndexOf("/set ") == 0)
-            {
-                mainChannel = _inputField.text.Substring(5);
-            }
-            else
-            {
-                _manager.Send(_inputField.text, mainChannel);
+            if (_inputField.text.IndexOf("/set ") == 0) {
+                _currentChannel = _inputField.text.Substring(5);
+            } else {
+                _manager.Send(_inputField.text, _currentChannel);
             }
             _inputField.text = "";
         }
