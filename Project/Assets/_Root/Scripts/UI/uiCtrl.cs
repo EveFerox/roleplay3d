@@ -4,15 +4,13 @@ using System.Collections.Generic;
 
 namespace UI
 {
-    public class uiCtrl : StaticMonoBehaviour<uiCtrl>
+    public class uiCtrl : Singleton<uiCtrl>
     {
         [SerializeField]
         Panels _panels;
 
-        protected override void Awake()
+        protected void Awake()
         {
-            base.Awake();
-
             GotoLogin();
         }
 
@@ -36,7 +34,6 @@ namespace UI
         {
             public uiLogin login;
             public uiRegister register;
-            public uiChat chat;
 
             public IEnumerable<Component> All
             {
@@ -44,7 +41,6 @@ namespace UI
                 {
                     yield return login;
                     yield return register;
-                    yield return chat;
                 }
             }
 

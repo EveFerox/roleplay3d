@@ -7,6 +7,9 @@ namespace UI
     public class uiRegister : MonoBehaviour
     {
         [SerializeField]
+        InputField _addressFiled;
+
+        [SerializeField]
         public InputField _username;
 
         [SerializeField]
@@ -19,15 +22,10 @@ namespace UI
         public InputField _password2;
 
         [SerializeField]
-        public GameObject _network;
-
-        [SerializeField]
         public GameObject _onlogin;
-
+        
         [SerializeField]
-        public Button _register;
-
-        SimpleAuthenticator auth;
+        SimpleAuthenticator _auth;
 
         bool validUsername = false;
         bool validPassword = false;
@@ -35,18 +33,16 @@ namespace UI
 
         void Awake()
         {
-            auth = _network.GetComponent<SimpleAuthenticator>();
-            auth.OnClientAuthenticate(NetworkClient.connection);
-            auth.OnAuthSuccess += Auth_OnAuthSuccess;
+            _auth.OnAuthSuccess += Auth_OnAuthSuccess;
 
-            _password.contentType = InputField.ContentType.Password;
-            _password2.contentType = InputField.ContentType.Password;
-
-            _register.enabled = false;
+            _addressFiled.onValueChanged.AddListener(v =>
+            {
+                NetworkManager.Instance.networkAddress = v.Length > 0 ? v : "localhost";
+            }); 
 
             _username.onValueChanged.AddListener(str =>
             {
-                validUsername = auth.ValidateUsername(str);
+                validUsername = _auth.ValidateUsername(str);
                 _username.textComponent.color = validUsername ? Color.white : Color.red;
             });
 
@@ -54,7 +50,6 @@ namespace UI
             {
                 validPasswordRegister = validPassword && _password2.text == _password.text;
                 _password2.textComponent.color = validPasswordRegister ? Color.white : Color.red;
-                _register.enabled = validPasswordRegister;
             });
 
             _password.onValueChanged.AddListener(str =>
@@ -63,7 +58,6 @@ namespace UI
                 validPasswordRegister = validPassword && _password2.text == _password.text;
                 _password.textComponent.color = validPassword ? Color.white : Color.red;
                 _password2.textComponent.color = validPasswordRegister ? Color.white : Color.red;
-                _register.enabled = validPasswordRegister;
             });
         }
 
@@ -74,18 +68,15 @@ namespace UI
             _onlogin?.SetActive(true);
         }
 
-        public void UI_Login()
-        {
-            auth.SetNextActionLogin(_username.text, _password.text);
-            auth.OnClientAuthenticate(NetworkClient.connection);
-        }
-
         public void UI_Register()
         {
-            if (_password.text == _password2.text) {
-                auth.SetNextActionRegister(_username.text, _password.text);
-                auth.OnClientAuthenticate(NetworkClient.connection);
+            if (_password.text != _password2.text) {
+                Debug.LogWarning("UI_Register: passwords dont match");
+                return;
             }
+
+            _auth.SetNextActionRegister(_username.text, _password.text);
+            _auth.OnClientAuthenticate(NetworkClient.connection);
         }
 
         public void UI_Back()

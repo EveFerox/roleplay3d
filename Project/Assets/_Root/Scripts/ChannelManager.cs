@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class ChannelManager : Singleton<ChannelManager>
 {
-    protected ChannelManager() { }
     readonly Dictionary<string, ChannelFeed> _channels = new Dictionary<string, ChannelFeed>();
     public static IReadOnlyDictionary<string, ChannelFeed> Channels => Instance._channels;
 

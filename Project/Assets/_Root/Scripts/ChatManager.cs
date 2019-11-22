@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class ChatManager : Singleton<ChatManager>
 {
-    protected ChatManager() { }
-
     public event EventHandler<bool> CanSendChange;
     public event EventHandler<ChatMessage> MessageReceived;
 

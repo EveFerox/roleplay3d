@@ -6,6 +6,8 @@ using System;
 /// </summary>
 public class NetworkManager : Mirror.NetworkManager
 {
+    public static NetworkManager Instance => singleton as NetworkManager;
+
     public static event EventHandler StartedHost;
     public static event EventHandler StopedHost;
 

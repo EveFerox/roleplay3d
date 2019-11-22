@@ -1,4 +1,4 @@
-﻿using Mirror.Authenticators;
+﻿using Mirror;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,37 +18,29 @@ namespace UI
         [SerializeField]
         SimpleAuthenticator _auth;
 
-        NetworkManager _manager;
-
         void Awake()
         {
-            _manager = FindObjectOfType<NetworkManager>();
-        }
-
-        void UpdateAuth()
-        {
-            _manager.networkAddress = _addressFiled.text.Length > 0 ? _addressFiled.text : "localhost";
+            _addressFiled.onValueChanged.AddListener(v =>
+            {
+                NetworkManager.Instance.networkAddress = v.Length > 0 ? v : "localhost";
+            }); 
         }
 
         public void UI_Login()
         {
-            UpdateAuth();
-
-            _manager.StartClient();
+            //NetworkManager.Instance.StartClient();
+            _auth.SetNextActionLogin(_userFiled.text, _passwordFiled.text);
+            _auth.OnClientAuthenticate(NetworkClient.connection);
         }
 
         public void UI_Host()
         {
-            UpdateAuth();
-
-            _manager.StartHost();
+            NetworkManager.Instance.StartHost();
         }
 
         public void UI_Server()
         {
-            UpdateAuth();
-
-            _manager.StartServer();
+            NetworkManager.Instance.StartServer();
         }
 
         public void UI_GotoRegister()

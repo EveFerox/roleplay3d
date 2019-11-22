@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 public class UserManager : Singleton<UserManager>
 {
-    protected UserManager() { }
     readonly Dictionary<string, User> _users = new Dictionary<string, User>();
     public static IReadOnlyDictionary<string, User> Users => Instance._users;
 
@@ -55,8 +54,10 @@ public class UserManager : Singleton<UserManager>
     static bool TryGetAuthUsername(NetworkConnection conn, out string username)
     {
         username = null;
-        if (conn.isAuthenticated && conn.authenticationData is string un)
+        if (conn.isAuthenticated && conn.authenticationData is string un) {
+            username = un;
             return true;
+        }
         return false;
     }
 

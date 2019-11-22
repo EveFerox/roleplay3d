@@ -15,6 +15,13 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
     public event EventHandler OnAuthSuccess;
 
+    void Awake()
+    {
+        //for testing
+        DataBase.Add("qwe", "qwe");
+        DataBase.Add("asd", "asd");
+    }
+
     public bool SetNextActionLogin(string username, string password)
     {
         if (!ValidateUsername(username)) return false;
