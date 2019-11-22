@@ -20,9 +20,6 @@ namespace UI
 
         [SerializeField]
         public InputField _password2;
-
-        [SerializeField]
-        public GameObject _onlogin;
         
         [SerializeField]
         SimpleAuthenticator _auth;
@@ -33,8 +30,6 @@ namespace UI
 
         void Awake()
         {
-            _auth.OnAuthSuccess += Auth_OnAuthSuccess;
-
             _addressFiled.onValueChanged.AddListener(v =>
             {
                 NetworkManager.Instance.networkAddress = v.Length > 0 ? v : "localhost";
@@ -59,13 +54,6 @@ namespace UI
                 _password.textComponent.color = validPassword ? Color.white : Color.red;
                 _password2.textComponent.color = validPasswordRegister ? Color.white : Color.red;
             });
-        }
-
-        void Auth_OnAuthSuccess(object sender, System.EventArgs e)
-        {
-            Debug.Log("Auth_OnAuthSuccess");
-            gameObject.SetActive(false);
-            _onlogin?.SetActive(true);
         }
 
         public void UI_Register()

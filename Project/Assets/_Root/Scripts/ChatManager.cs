@@ -21,9 +21,6 @@ public class ChatManager : Singleton<ChatManager>
         }
     }
 
-    readonly List<ChatMessage> _messages = new List<ChatMessage>();
-    public IReadOnlyList<ChatMessage> Messages => _messages;
-
     protected void Awake()
     {
         NetworkManager.StopedHost += (sender, args) =>
