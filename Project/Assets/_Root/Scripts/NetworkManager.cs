@@ -49,4 +49,22 @@ public class NetworkManager : Mirror.NetworkManager
         base.OnClientDisconnect(conn);
         ClientDisconnected?.Invoke(this, conn);
     }
+
+    // Transport.activeTransport maybe null, original code does not check this
+    public override void OnApplicationQuit()
+    {
+        if (NetworkClient.isConnected)
+        {
+            StopClient();
+            print("OnApplicationQuit: stopped client");
+        }
+
+        if (NetworkServer.active)
+        {
+            StopServer();
+            print("OnApplicationQuit: stopped server");
+        }
+
+        Transport.activeTransport?.Shutdown();
+    }
 }

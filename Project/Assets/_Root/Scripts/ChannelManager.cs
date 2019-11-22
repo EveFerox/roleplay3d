@@ -2,16 +2,16 @@
 using Mirror;
 using UnityEngine;
 
-public class ChannelManager : StaticMonoBehaviour<ChannelManager>
+public class ChannelManager : Singleton<ChannelManager>
 {
+    protected ChannelManager() { }
+
     readonly Dictionary<string, ChannelFeed> Channels = new Dictionary<string, ChannelFeed>();
 
     ChannelFeed _globalFeed;
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
-
         NetworkManager.StartedHost += (sender, args) =>
         {
             _globalFeed = CreateChannel("Global");

@@ -18,6 +18,7 @@ namespace UI
         [SerializeField]
         BasicAuthenticator _auth;
 
+        [SerializeField]
         NetworkManager _manager;
 
         void Awake()

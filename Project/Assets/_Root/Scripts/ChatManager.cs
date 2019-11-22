@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
-public class ChatManager : StaticMonoBehaviour<ChatManager>
+public class ChatManager : Singleton<ChatManager>
 {
+    protected ChatManager() { }
+
     public event EventHandler<bool> CanSendChange;
     public event EventHandler<ChatMessage> MessageReceived;
 
@@ -24,10 +26,8 @@ public class ChatManager : StaticMonoBehaviour<ChatManager>
     readonly List<ChatMessage> _messages = new List<ChatMessage>();
     public IReadOnlyList<ChatMessage> Messages => _messages;
 
-    protected override void Awake()
+    protected void Awake()
     {
-        base.Awake();
-
         NetworkManager.StopedHost += (sender, args) =>
         {
             CanSend = false;

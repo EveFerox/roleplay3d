@@ -4,16 +4,14 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
-[RequireComponent(typeof(UserManager))]
 public class SimpleAuthenticator : NetworkAuthenticator
 {
     readonly Dictionary<string, string> DataBase = new Dictionary<string, string>();
 
     IMessageBase authMessage;
 
-    UserManager users;
-    ChannelManager channels;
-
+    UserManager _users;
+    ChannelManager _channels;
     [SerializeField]
     string usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
 
@@ -21,10 +19,9 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
     void Awake()
     {
-        users = GetComponent<UserManager>();
-        channels = GetComponent<ChannelManager>();
+        _users = GetComponent<UserManager>();
+        _channels = GetComponent<ChannelManager>();
     }
-
     public bool SetNextActionLogin(string username, string password)
     {
         if (!ValidateUsername(username)) return false;
@@ -80,7 +77,6 @@ public class SimpleAuthenticator : NetworkAuthenticator
             req.Username);
     }
 
-    [Server]
     void OnRegisterRequestMessage(NetworkConnection conn, RegisterRequestMessage req)
     {
         Debug.LogFormat("Register Request: {0} {1}", req.Username ?? "", req.Password ?? "");
@@ -109,9 +105,9 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
             base.OnServerAuthenticated.Invoke(conn);
 
-            if (users.Register(conn) is User user)
+            if (_users.Register(conn) is User user)
             {
-                channels.SubscribeToGlobal(user);
+                _channels.SubscribeToGlobal(user);
             }
             else
             {

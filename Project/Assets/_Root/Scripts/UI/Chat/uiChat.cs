@@ -21,13 +21,7 @@ namespace UI
 
         void Awake()
         {
-            _manager = FindObjectOfType<ChatManager>();
-
-            if (_manager == null) {
-                Debug.LogError("Failed to find ChatManager", this);
-                return;
-            }
-
+            _manager = ChatManager.Instance;
             _manager.CanSendChange += Manager_CanSendChange;
             _manager.MessageReceived += Manager_MessageReceived;
 

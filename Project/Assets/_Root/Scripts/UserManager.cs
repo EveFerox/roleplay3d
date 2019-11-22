@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UserManager : StaticMonoBehaviour<UserManager>
+public class UserManager : Singleton<UserManager>
 {
+    protected UserManager() { }
+
     readonly Dictionary<string, User> DataBase = new Dictionary<string, User>();
 
-    protected override void Awake()
-    {
-        base.Awake();
-        
+    protected void Awake()
+    {       
         NetworkManager.StopedHost += (sender, args) =>
         {
             Clear();
