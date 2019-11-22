@@ -5,8 +5,8 @@ using UnityEngine;
 public class ChannelManager : Singleton<ChannelManager>
 {
     protected ChannelManager() { }
-
-    readonly Dictionary<string, ChannelFeed> Channels = new Dictionary<string, ChannelFeed>();
+    readonly Dictionary<string, ChannelFeed> _channels = new Dictionary<string, ChannelFeed>();
+    public static IReadOnlyDictionary<string, ChannelFeed> Channels => Instance._channels;
 
     ChannelFeed _globalFeed;
 
@@ -29,15 +29,38 @@ public class ChannelManager : Singleton<ChannelManager>
 
     public ChannelFeed CreateChannel(string name)
     {
-        if (Channels.ContainsKey(name)) {
-            Debug.Log($"Channel {name} already exists");
+        if (string.IsNullOrWhiteSpace(name)) {
+            Debug.LogWarning($"CreateChannel: invalid channel name");
             return null;
         }
 
-        var channel = new ChannelFeed {Name = name};
-        Channels.Add(name, channel);
+        if (_channels.ContainsKey(name)) {
+            Debug.LogWarning($"CreateChannel: {name} already exists");
+            return null;
+        }
+
+        var channel = new ChannelFeed(name);
+        channel.UserChanged += (sender, info) =>
+        {
+            switch (info.Change) {
+                case ChannelFeed.UserChangeE.Unsubscribed:
+                case ChannelFeed.UserChangeE.Disconnected:
+                    if (info.Channel.Users.Count == 0) {
+                        //Remove channel if everyone left it
+                        RemoveChannel(info.Channel.Name);
+                    }
+                    break;
+            }
+        };
+
+        _channels.Add(name, channel);
 
         return channel;
+    }
+
+    void RemoveChannel(string name)
+    {
+        _channels.Remove(name);
     }
 
     void HandleMessage(User user, ChatMessage msg)
@@ -46,13 +69,13 @@ public class ChannelManager : Singleton<ChannelManager>
         {
             return;
         }
-        if (Channels.TryGetValue(msg.Channel, out var channel))
+        if (_channels.TryGetValue(msg.Channel, out var channel))
         {
-            if (msg.Message[0] == '/')
-            {
+            if (msg.Message[0] == '/') {
                 channel.Control(user, msg.Message.Substring(1));
+            } else {
+                channel.SendChat(user, msg);
             }
-            channel.SendChat(user, msg);
         }
         else if (msg.Message.IndexOf("/create ") == 0)
         {
@@ -68,14 +91,14 @@ public class ChannelManager : Singleton<ChannelManager>
         }
     }
 
-    public void SubscribeToGlobal(User user)
+    public static void SubscribeToGlobal(User user)
     {
-        _globalFeed.Subscribe(user);
+        Instance._globalFeed.Subscribe(user);
     }
 
-    public void Clear()
+    void Clear()
     {
-        Channels.Clear();
+        _channels.Clear();
         _globalFeed = null;
     }
 }

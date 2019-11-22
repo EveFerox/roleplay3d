@@ -16,9 +16,12 @@ public abstract class DefaultMessageBase : IMessageBase
         StaticSerialize(writer, this);
     }
 
-    [Exclude, ThreadStatic] private static CerasSerializer _ceras;
-    [ThreadStatic] private static byte[] _lengthPrefixBuffer;
-    [ThreadStatic] private static byte[] _streamBuffer;
+    [Exclude, ThreadStatic]
+    static CerasSerializer _ceras;
+    [ThreadStatic]
+    static byte[] _lengthPrefixBuffer;
+    [ThreadStatic]
+    static byte[] _streamBuffer;
 
     static DefaultMessageBase()
     {
@@ -27,7 +30,7 @@ public abstract class DefaultMessageBase : IMessageBase
         _ceras = new CerasSerializer(config);
     }
 
-    private static object StaticDeserialize(NetworkReader reader)
+    static object StaticDeserialize(NetworkReader reader)
     {
         var length = (int)ReadVarIntFromStream(reader);
         var recvBuffer = new byte[length];
@@ -35,7 +38,7 @@ public abstract class DefaultMessageBase : IMessageBase
         return _ceras.Deserialize<object>(recvBuffer);
     }
 
-    private static void StaticSerialize(NetworkWriter writer, object obj)
+    static void StaticSerialize(NetworkWriter writer, object obj)
     {
         if (_lengthPrefixBuffer == null)
         {
@@ -50,7 +53,7 @@ public abstract class DefaultMessageBase : IMessageBase
         writer.WriteBytes(_streamBuffer, 0, size);
     }
 
-    private static uint ReadVarIntFromStream(NetworkReader reader)
+    static uint ReadVarIntFromStream(NetworkReader reader)
     {
         var shift = 0;
         ulong result = 0;

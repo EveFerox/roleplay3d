@@ -3,14 +3,17 @@ using Mirror;
 
 public class User
 {
-    public event EventHandler OnDisconnect;
+    public event EventHandler Connected;
+    public event EventHandler Disconnected;
 
     public readonly string Username;
     public NetworkConnection Connection { get; set; }
 
+    public bool IsConnected => Connection?.isAuthenticated ?? false;
+
     internal void DisconnectedInternal()
     {
-        OnDisconnect?.Invoke(this, EventArgs.Empty);
+        Disconnected?.Invoke(this, EventArgs.Empty);
     }
 
     public User(string username)

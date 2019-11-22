@@ -5,14 +5,21 @@ using System.Collections.Generic;
 public class ChannelFeed
 {
     public event EventHandler<UserChangeInfo> UserChanged;
-
     public event EventHandler Removed;
 
-    readonly HashSet<User> Users = new HashSet<User>();
-    readonly List<ChatMessage> ChatLog = new List<ChatMessage>();
+    readonly HashSet<User> _users = new HashSet<User>();
+    public IReadOnlyCollection<User> Users => _users;
 
-    public string Name { get; set; }
+    readonly List<ChatMessage> _chatLog = new List<ChatMessage>();
+    public IReadOnlyList<ChatMessage> ChatLog => _chatLog;
+
+    public string Name { get; }
     public bool SaveMessages { get; set; } = true;
+
+    public ChannelFeed(string name)
+    {
+        Name = name;
+    }
 
     protected virtual bool CanSubscribe(User user)
     {
@@ -21,22 +28,22 @@ public class ChannelFeed
 
     protected virtual void OnSubscribe(User user)
     {
-        Users.Add(user);
-        user.OnDisconnect += (s, e) => { OnDisconnect(user); };
+        _users.Add(user);
+        user.Disconnected += (s, e) => { OnDisconnect(user); };
         UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Subscribed));
         SendInfo($"{user.Username} connected");
     }
 
     protected virtual void OnDisconnect(User user)
     {
-        Users.Remove(user);
+        _users.Remove(user);
         UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Disconnected));
         SendInfo($"{user.Username} disconnected");
     }
 
     protected virtual void OnUnsubscribe(User user)
     {
-        Users.Remove(user);
+        _users.Remove(user);
         UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Unsubscribed));
         SendInfo($"{user.Username} left");
     }
@@ -54,14 +61,12 @@ public class ChannelFeed
 
     public virtual void Control(User user, string message)
     {
-        switch (message)
-        {
+        switch (message) {
             case "leave":
                 Unsubscribe(user);
                 break;
             case "join":
-                if (CanSubscribe(user))
-                {
+                if (CanSubscribe(user)) {
                     Subscribe(user);
                 }
                 break;
@@ -70,7 +75,7 @@ public class ChannelFeed
 
     public bool IsSubscribed(User user)
     {
-        return Users.Contains(user);
+        return _users.Contains(user);
     }
 
     public void Subscribe(User user)
@@ -96,9 +101,9 @@ public class ChannelFeed
         var result = true;
         if (SaveMessages && msg is ChatMessage chat)
         {
-            ChatLog.Add(chat);
+            _chatLog.Add(chat);
         }
-        foreach (var user in Users)
+        foreach (var user in _users)
         {
             result &= user.Connection.Send(msg, channelId);
         }
@@ -113,7 +118,7 @@ public class ChannelFeed
         msg.Channel = Name;
         msg.Time = DateTime.UtcNow;
         SendToAll(msg);
-        if (!Users.Contains(user))
+        if (!_users.Contains(user))
         {
             msg.Sender = "#";
             user.Connection.Send(msg);

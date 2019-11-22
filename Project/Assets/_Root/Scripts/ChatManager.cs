@@ -35,14 +35,11 @@ public class ChatManager : Singleton<ChatManager>
 
         NetworkManager.ClientConnected += (sender, connection) =>
         {
-            _messages.Clear();
             CanSend = true;
 
             NetworkClient.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
             {
                 MessageReceived?.Invoke(this, msg);
-            
-                _messages.Add(msg);
             });
         };
         NetworkManager.ClientDisconnected += (sender, connection) =>

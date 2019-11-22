@@ -10,29 +10,22 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
     IMessageBase authMessage;
 
-    UserManager _users;
-    ChannelManager _channels;
     [SerializeField]
-    string usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
+    string _usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
 
     public event EventHandler OnAuthSuccess;
 
-    void Awake()
-    {
-        _users = GetComponent<UserManager>();
-        _channels = GetComponent<ChannelManager>();
-    }
     public bool SetNextActionLogin(string username, string password)
     {
         if (!ValidateUsername(username)) return false;
-        authMessage = new LoginRequestMessage { Username = username, Password = password };
+        authMessage = new LoginRequestMessage {Username = username, Password = password};
         return true;
     }
 
-    public bool SetNextActionRegister(string username, string password, string password2)
+    public bool SetNextActionRegister(string username, string password)
     {
         if (!ValidateUsername(username)) return false;
-        authMessage = new RegisterRequestMessage { Username = username, Password = password, Password2 = password2 };
+        authMessage = new RegisterRequestMessage {Username = username, Password = password};
         return true;
     }
 
@@ -47,21 +40,17 @@ public class SimpleAuthenticator : NetworkAuthenticator
         NetworkClient.RegisterHandler<AuthenticationResponseMessage>(OnAuthenticationResponseMessage, false);
     }
 
-    public override void OnServerAuthenticate(NetworkConnection conn)
-    {
-
-    }
+    public override void OnServerAuthenticate(NetworkConnection conn) { }
 
     public override void OnClientAuthenticate(NetworkConnection conn)
     {
-        if (authMessage is LoginRequestMessage login)
-        {
-            conn.Send(login);
-        }
-
-        if (authMessage is RegisterRequestMessage register)
-        {
-            conn.Send(register);
+        switch (authMessage) {
+            case LoginRequestMessage login:
+                conn.Send(login);
+                break;
+            case RegisterRequestMessage register:
+                conn.Send(register);
+                break;
         }
 
         authMessage = null;
@@ -71,9 +60,9 @@ public class SimpleAuthenticator : NetworkAuthenticator
     {
         Debug.LogFormat("Login Request: {0} {1}", req.Username, req.Password);
 
-        AuthConnection(conn, ValidateUsername(req.Username) && 
-            DataBase.TryGetValue(req.Username, out var hash) && 
-            hash == req.Password,
+        AuthConnection(conn, ValidateUsername(req.Username) &&
+                             DataBase.TryGetValue(req.Username, out var hash) &&
+                             hash == req.Password,
             req.Username);
     }
 
@@ -81,51 +70,42 @@ public class SimpleAuthenticator : NetworkAuthenticator
     {
         Debug.LogFormat("Register Request: {0} {1}", req.Username ?? "", req.Password ?? "");
 
-        if (ValidateUsername(req.Username) && !DataBase.ContainsKey(req.Username))
-        {
+        if (ValidateUsername(req.Username) && !DataBase.ContainsKey(req.Username)) {
             DataBase.Add(req.Username, req.Password);
             AuthConnection(conn, true, req.Username);
-        }
-        else
-        {
+        } else {
             AuthConnection(conn, false);
         }
     }
 
     public bool ValidateUsername(string username)
     {
-        return username != null && Regex.IsMatch(username, usernameRegex);
+        return username != null && Regex.IsMatch(username, _usernameRegex);
     }
 
     void AuthConnection(NetworkConnection conn, bool success, string token = null)
     {
-        if (success)
-        {
+        if (success) {
             conn.authenticationData = token;
 
             base.OnServerAuthenticated.Invoke(conn);
 
-            if (_users.Register(conn) is User user)
-            {
-                _channels.SubscribeToGlobal(user);
-            }
-            else
-            {
+            if (UserManager.Register(conn) is User user) {
+                ChannelManager.SubscribeToGlobal(user);
+            } else {
                 AuthConnection(conn, false);
                 return;
             }
 
             conn.Send(new AuthenticationResponseMessage
             {
-                Success = true,
+                IsSuccess = true,
                 Message = "Success",
             });
-        }
-        else
-        {
+        } else {
             conn.Send(new AuthenticationResponseMessage
             {
-                Success = false,
+                IsSuccess = false,
                 Message = "Invalid Credentials"
             });
             conn.isAuthenticated = false;
@@ -135,16 +115,13 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
     void OnAuthenticationResponseMessage(NetworkConnection conn, AuthenticationResponseMessage res)
     {
-        if (res.Success)
-        {
+        if (res.IsSuccess) {
             Debug.LogFormat("Authentication Response: {0}", res.Message);
 
             base.OnClientAuthenticated.Invoke(conn);
 
             OnAuthSuccess?.Invoke(this, EventArgs.Empty);
-        }
-        else
-        {
+        } else {
             Debug.LogErrorFormat("Authentication Response: {0}", res.Message);
 
             conn.isAuthenticated = false;
@@ -159,8 +136,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
         protected override void CopyFrom(object obj)
         {
-            if (obj is LoginRequestMessage v)
-            {
+            if (obj is LoginRequestMessage v) {
                 Username = v.Username;
                 Password = v.Password;
             }
@@ -171,29 +147,27 @@ public class SimpleAuthenticator : NetworkAuthenticator
     {
         public string Username { get; set; }
         public string Password { get; set; }
-        public string Password2 { get; set; }
+        public string Email { get; set; }
 
         protected override void CopyFrom(object obj)
         {
-            if (obj is RegisterRequestMessage v)
-            {
+            if (obj is RegisterRequestMessage v) {
                 Username = v.Username;
                 Password = v.Password;
-                Password2 = v.Password2;
+                Email = v.Email;
             }
         }
     }
 
     public class AuthenticationResponseMessage : DefaultMessageBase
     {
-        public bool Success { get; set; }
+        public bool IsSuccess { get; set; }
         public string Message { get; set; }
 
         protected override void CopyFrom(object obj)
         {
-            if (obj is AuthenticationResponseMessage v)
-            {
-                Success = v.Success;
+            if (obj is AuthenticationResponseMessage v) {
+                IsSuccess = v.IsSuccess;
                 Message = v.Message;
             }
         }

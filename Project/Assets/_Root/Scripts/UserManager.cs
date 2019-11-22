@@ -1,12 +1,11 @@
 ﻿using Mirror;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class UserManager : Singleton<UserManager>
 {
     protected UserManager() { }
-
-    readonly Dictionary<string, User> DataBase = new Dictionary<string, User>();
+    readonly Dictionary<string, User> _users = new Dictionary<string, User>();
+    public static IReadOnlyDictionary<string, User> Users => Instance._users;
 
     protected void Awake()
     {       
@@ -23,40 +22,47 @@ public class UserManager : Singleton<UserManager>
 
     public static User GetUser(NetworkConnection conn)
     {
-        if (conn.isAuthenticated && conn.authenticationData is string username && Instance.DataBase.TryGetValue(username, out var user)) {
+        if (TryGetAuthUsername(conn, out var username) && Instance._users.TryGetValue(username, out var user)) {
             return user;
         }
         return null;
     }
 
-    public User Register(NetworkConnection conn)
+    public static User Register(NetworkConnection conn)
     {
-        if (conn.isAuthenticated && conn.authenticationData is string username)
-        {
-            if (DataBase.TryGetValue(username, out var user))
-            {
-                if (user.Connection == null)
-                {
+        if (TryGetAuthUsername(conn, out var username)) {
+            if (Instance._users.TryGetValue(username, out var user)) {
+                if (user.Connection == null) {
                     user.Connection = conn;
                     return user;
-                }
-                else
-                {
+                } else {
                     return null;
                 }
             }
-            var newUser = new User(username) { Connection = conn };
-            DataBase.Add(username, newUser);
-            newUser.OnDisconnect += (s, e) => newUser.Connection = null;
+            var newUser = new User(username) {Connection = conn};
+            Instance.AddUser(newUser);
             return newUser;
         }
         return null;
     }
 
-    public void Clear()
+    void AddUser(User user)
     {
-        foreach (var user in DataBase.Values)
-        {
+        _users.Add(user.Username, user);
+        user.Disconnected += (s, e) => user.Connection = null;
+    }
+
+    static bool TryGetAuthUsername(NetworkConnection conn, out string username)
+    {
+        username = null;
+        if (conn.isAuthenticated && conn.authenticationData is string un)
+            return true;
+        return false;
+    }
+
+    void Clear()
+    {
+        foreach (var user in _users.Values) {
             user.Connection = null;
         }
     }

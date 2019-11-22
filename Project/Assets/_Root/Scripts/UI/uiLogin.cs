@@ -1,88 +1,59 @@
-﻿using Mirror;
+﻿using Mirror.Authenticators;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class uiLogin : MonoBehaviour
+namespace UI
 {
-
-    [SerializeField]
-    public InputField _username;
-
-    [SerializeField]
-    public InputField _password;
-
-    [SerializeField]
-    public InputField _passwordRegister;
-
-    [SerializeField]
-    public GameObject _network;
-
-    [SerializeField]
-    public GameObject _onlogin;
-
-    [SerializeField]
-    public Button _register;
-
-
-    private SimpleAuthenticator auth;
-
-    private bool validUsername = false;
-    private bool validPassword = false;
-    private bool validPasswordRegister = false;
-
-    private void Awake()
+    public class uiLogin : MonoBehaviour
     {
-        auth = _network.GetComponent<SimpleAuthenticator>();
-        auth.OnClientAuthenticate(NetworkClient.connection);
-        auth.OnAuthSuccess += Auth_OnAuthSuccess;
+        [SerializeField]
+        InputField _addressFiled;
 
-        _password.contentType = InputField.ContentType.Password;
-        _passwordRegister.contentType = InputField.ContentType.Password;
+        [SerializeField]
+        InputField _userFiled;
 
-        _register.enabled = false;
+        [SerializeField]
+        InputField _passwordFiled;
 
-        _username.onValueChanged.AddListener(str =>
+        [SerializeField]
+        SimpleAuthenticator _auth;
+
+        NetworkManager _manager;
+
+        void Awake()
         {
-            validUsername = auth.ValidateUsername(str);
-            _username.textComponent.color = validUsername ? Color.white : Color.red;
-        });
+            _manager = FindObjectOfType<NetworkManager>();
+        }
 
-        _passwordRegister.onValueChanged.AddListener(str =>
+        void UpdateAuth()
         {
-            validPasswordRegister = validPassword && _passwordRegister.text == _password.text;
-            _passwordRegister.textComponent.color = validPasswordRegister ? Color.white : Color.red;
-            _register.enabled = validPasswordRegister;
-        });
+            _manager.networkAddress = _addressFiled.text.Length > 0 ? _addressFiled.text : "localhost";
+        }
 
-        _password.onValueChanged.AddListener(str =>
+        public void UI_Login()
         {
-            validPassword = _password.text.Length > 2;
-            validPasswordRegister = validPassword && _passwordRegister.text == _password.text;
-            _password.textComponent.color = validPassword ? Color.white : Color.red;
-            _passwordRegister.textComponent.color = validPasswordRegister ? Color.white : Color.red;
-            _register.enabled = validPasswordRegister;
-        });
-    }
+            UpdateAuth();
 
-    private void Auth_OnAuthSuccess(object sender, System.EventArgs e)
-    {
-        Debug.Log("Auth_OnAuthSuccess");
-        gameObject.SetActive(false);
-        _onlogin?.SetActive(true);
-    }
+            _manager.StartClient();
+        }
 
-    public void UI_Login()
-    {
-        auth.SetNextActionLogin(_username.text, _password.text);
-        auth.OnClientAuthenticate(NetworkClient.connection);
-    }
-
-    public void UI_Register()
-    {
-        if (_password.text == _passwordRegister.text)
+        public void UI_Host()
         {
-            auth.SetNextActionRegister(_username.text, _password.text, _passwordRegister.text);
-            auth.OnClientAuthenticate(NetworkClient.connection);
+            UpdateAuth();
+
+            _manager.StartHost();
+        }
+
+        public void UI_Server()
+        {
+            UpdateAuth();
+
+            _manager.StartServer();
+        }
+
+        public void UI_GotoRegister()
+        {
+            uiCtrl.GotoRegister();
         }
     }
 }
