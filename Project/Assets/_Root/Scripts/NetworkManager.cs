@@ -1,5 +1,7 @@
 ﻿using Mirror;
 using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// Extended <see cref="Mirror.NetworkManager"/>
@@ -7,6 +9,8 @@ using System;
 public class NetworkManager : Mirror.NetworkManager
 {
     public static NetworkManager Instance => singleton as NetworkManager;
+
+    SimpleAuthenticator _auth => authenticator as SimpleAuthenticator;
 
     public static event EventHandler StartedHost;
     public static event EventHandler StopedHost;
@@ -16,6 +20,30 @@ public class NetworkManager : Mirror.NetworkManager
 
     public static event EventHandler<NetworkConnection> ClientConnected;
     public static event EventHandler<NetworkConnection> ClientDisconnected;
+
+    public bool ValidateUsername(string username) => _auth.ValidateUsername(username);
+
+    public void Login(string username, string password)
+    {
+        EnsureClientStarted();
+
+        _auth.Login(username, password);
+    }
+
+    public void Register(RegisterInfo info)
+    {
+        EnsureClientStarted();
+        
+        _auth.Register(info);
+    }
+
+    void EnsureClientStarted()
+    {
+        if (NetworkClient.active) return;
+        
+        Debug.Log("Starting client");
+        StartClient();
+    }
 
     public override void OnStartHost()
     {

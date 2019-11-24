@@ -13,8 +13,8 @@ namespace Ceras.Editor
 
     public static class CerasUnityEditorTools
 	{
-		public static string OutputCsFileName = "Assets/Scripts/CerasAotFormattersGenerated.cs";
-		public static bool ShowMessages = true;
+		public static string OutputCsFileName = "Assets/_Root/Scripts/CerasAotFormattersGenerated.cs";
+		public static bool ShowMessages = false;
 
 		[DidReloadScripts, MenuItem("Tools/Ceras/Generate AOT Formatters")]
 		public static void GenerateAotFormatters()

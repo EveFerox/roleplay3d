@@ -1,5 +1,4 @@
-﻿using Mirror;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI
@@ -15,9 +14,6 @@ namespace UI
         [SerializeField]
         InputField _passwordFiled;
 
-        [SerializeField]
-        SimpleAuthenticator _auth;
-
         void Awake()
         {
             _addressFiled.onValueChanged.AddListener(v =>
@@ -28,9 +24,7 @@ namespace UI
 
         public void UI_Login()
         {
-            //NetworkManager.Instance.StartClient();
-            _auth.SetNextActionLogin(_userFiled.text, _passwordFiled.text);
-            _auth.OnClientAuthenticate(NetworkClient.connection);
+            NetworkManager.Instance.Login(_userFiled.text, _passwordFiled.text);
         }
 
         public void UI_Host()

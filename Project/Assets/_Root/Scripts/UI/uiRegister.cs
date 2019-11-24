@@ -1,5 +1,4 @@
-﻿using Mirror;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI
@@ -20,9 +19,6 @@ namespace UI
 
         [SerializeField]
         public InputField _password2;
-        
-        [SerializeField]
-        SimpleAuthenticator _auth;
 
         bool validUsername = false;
         bool validPassword = false;
@@ -37,7 +33,7 @@ namespace UI
 
             _username.onValueChanged.AddListener(str =>
             {
-                validUsername = _auth.ValidateUsername(str);
+                validUsername = NetworkManager.Instance.ValidateUsername(str);
                 _username.textComponent.color = validUsername ? Color.white : Color.red;
             });
 
@@ -63,8 +59,9 @@ namespace UI
                 return;
             }
 
-            _auth.SetNextActionRegister(_username.text, _password.text);
-            _auth.OnClientAuthenticate(NetworkClient.connection);
+            var info = new RegisterInfo(_username.text, _password.text, _email.text);
+
+            NetworkManager.Instance.Register(info);
         }
 
         public void UI_Back()

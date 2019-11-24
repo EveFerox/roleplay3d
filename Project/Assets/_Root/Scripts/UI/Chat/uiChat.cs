@@ -14,14 +14,16 @@ namespace UI
 
         [SerializeField]
         ScrollRect _scroll;
-
+        
+        [SerializeField]
         string _currentChannel = "Global";
-        ChatManager _manager;
+
+        ChatManager _manager => ChatManager.Instance;
+
         readonly List<uiChatItem> _chatItems = new List<uiChatItem>();
 
         void Awake()
         {
-            _manager = ChatManager.Instance;
             _manager.CanSendChange += Manager_CanSendChange;
             _manager.MessageReceived += Manager_MessageReceived;
 

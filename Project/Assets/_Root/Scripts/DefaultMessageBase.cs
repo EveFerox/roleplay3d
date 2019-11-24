@@ -1,16 +1,27 @@
-﻿using Ceras;
+﻿using System;
+using Ceras;
 using Mirror;
-using System;
+using Newtonsoft.Json;
 
 public abstract class DefaultMessageBase : IMessageBase
 {
     protected abstract void CopyFrom(object obj);
 
+    //Json
+    //public void Deserialize(NetworkReader reader)
+    //{
+    //    CopyFrom(JsonConvert.DeserializeObject(reader.ReadString(), GetType()));
+    //}
+    //public void Serialize(NetworkWriter writer)
+    //{
+    //    writer.WriteString(JsonConvert.SerializeObject(this));
+    //}
+
+    //Ceras
     public void Deserialize(NetworkReader reader)
     {
         CopyFrom(StaticDeserialize(reader));
     }
-
     public void Serialize(NetworkWriter writer)
     {
         StaticSerialize(writer, this);
@@ -40,8 +51,7 @@ public abstract class DefaultMessageBase : IMessageBase
 
     static void StaticSerialize(NetworkWriter writer, object obj)
     {
-        if (_lengthPrefixBuffer == null)
-        {
+        if (_lengthPrefixBuffer == null) {
             _lengthPrefixBuffer = new byte[5];
         }
 
@@ -59,20 +69,17 @@ public abstract class DefaultMessageBase : IMessageBase
         ulong result = 0;
         const int bits = 32;
 
-        while (true)
-        {
+        while (true) {
             ulong byteValue = reader.ReadByte();
 
             var tmp = byteValue & 0x7f;
             result |= tmp << shift;
 
-            if (shift > bits)
-            {
+            if (shift > bits) {
                 throw new Exception("Malformed VarInt");
             }
 
-            if ((byteValue & 0x80) != 0x80)
-            {
+            if ((byteValue & 0x80) != 0x80) {
                 return (uint)result;
             }
 
@@ -80,4 +87,3 @@ public abstract class DefaultMessageBase : IMessageBase
         }
     }
 }
-
