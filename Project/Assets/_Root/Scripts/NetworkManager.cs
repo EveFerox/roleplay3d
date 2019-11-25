@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Extended <see cref="Mirror.NetworkManager"/>
 /// </summary>
-public class NetworkManager : Mirror.NetworkManager
+public class NetworkManager : NetworkRoomManager
 {
     public static NetworkManager Instance => singleton as NetworkManager;
 

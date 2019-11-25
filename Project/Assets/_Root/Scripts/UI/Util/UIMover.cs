@@ -1,9 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
-public class UIMover : MonoBehaviour
+[RequireComponent(typeof(RectTransform))]
+[RequireComponent(typeof(LayoutElement))]
+public class UIMover : UIBehaviour, ILayoutIgnorer
 {
+    
     public RectTransform canvas;
     public RectTransform parent;
     public HoldButton moveButton;
@@ -22,7 +27,9 @@ public class UIMover : MonoBehaviour
     private Vector2 _point;
     private Vector2 _pointLast;
 
-    private void Awake() {
+    protected override void Awake() {
+        base.Awake();
+
         if (allowMove) {
             moveButton.gameObject.SetActive(allowMove);
 
@@ -44,10 +51,20 @@ public class UIMover : MonoBehaviour
         FindObjectOfType<InputSystemUIInputModule>().point.action.performed += ctx => _point = ctx.ReadValue<Vector2>();
     }
 
+    public void Resize() {
+        var rect = GetComponent<RectTransform>();
+        var size = rect.sizeDelta.y * ((allowMove ? 1 : 0) + (allowResize ? 1 : 0) + (allowClose ? 1 : 0));
+        rect.sizeDelta = new Vector2(size, rect.sizeDelta.y);
+        rect.transform.position = parent.transform.position + new Vector3(size / -2, rect.sizeDelta.y);
+        SetDirty();
+    }   
+
     public void Validate() {
         parent.pivot = Vector2.zero;
         parent.anchorMin = new Vector2(0.0f, 0.0f);
         parent.anchorMax = new Vector2(0.0f, 0.0f);
+
+        ignoreLayout = true;
     }
 
     private void Update() {
@@ -65,5 +82,16 @@ public class UIMover : MonoBehaviour
             parent.sizeDelta -= _pointLast - _point;
             _pointLast = _point;
         }
+    }
+
+
+    public bool ignoreLayout {
+        get => GetComponent<LayoutElement>().ignoreLayout;
+        set { GetComponent<LayoutElement>().ignoreLayout = value; SetDirty(); }
+    }
+
+    protected void SetDirty() {
+        if (!IsActive())  return;
+        LayoutRebuilder.MarkLayoutForRebuild(transform as RectTransform);
     }
 }

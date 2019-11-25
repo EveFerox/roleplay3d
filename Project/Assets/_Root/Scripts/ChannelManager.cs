@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ public class ChannelManager : Singleton<ChannelManager>
 {
     readonly Dictionary<string, ChannelFeed> _channels = new Dictionary<string, ChannelFeed>();
     public static IReadOnlyDictionary<string, ChannelFeed> Channels => Instance._channels;
+
+    public event EventHandler<ChannelFeed> OnChanellCreated;
 
     ChannelFeed _globalFeed;
 
@@ -54,11 +57,16 @@ public class ChannelManager : Singleton<ChannelManager>
 
         _channels.Add(name, channel);
 
+        OnChanellCreated?.Invoke(this, channel);
+
         return channel;
     }
 
-    void RemoveChannel(string name)
+    public void RemoveChannel(string name)
     {
+        if (_channels.TryGetValue(name, out var channel)) {
+            channel.RemoveChannel();
+        }
         _channels.Remove(name);
     }
 
@@ -97,6 +105,9 @@ public class ChannelManager : Singleton<ChannelManager>
 
     void Clear()
     {
+        foreach(var channel in _channels.Values) {
+            channel.RemoveChannel();
+        }
         _channels.Clear();
         _globalFeed = null;
     }
