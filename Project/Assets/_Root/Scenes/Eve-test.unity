@@ -615,6 +615,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 998685032}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &998685034 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6097887216724861694, guid: 54d7f2f61b99e5d4fb26c2da6da266e2,
+    type: 3}
+  m_PrefabInstance: {fileID: 998685032}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00fe80a51ee002441aa96c3a603cadcb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1824425621
 GameObject:
   m_ObjectHideFlags: 0
@@ -662,6 +674,7 @@ MonoBehaviour:
   _panels:
     login: {fileID: 514890420}
     register: {fileID: 9214671991882980170}
+    chat: {fileID: 998685034}
 --- !u!1 &1849805607
 GameObject:
   m_ObjectHideFlags: 0
@@ -811,6 +824,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   _usernameRegex: ^[a-zA-Z][a-zA-Z0-9]{2,19}$
+  _passwordRegex: ^[a-zA-Z0-9@$!%*#?&]{3,20}$
+  _emailRegex: ^[a-zA-Z0-9@$!%*#?&]{2,20}$
 --- !u!114 &1849805614
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2250,6 +2265,36 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3812350846539601881, guid: 76b0edb60252a1248b4238c3a6e51ac7,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2097539506320808479, guid: 76b0edb60252a1248b4238c3a6e51ac7,
+        type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2097539506320808479, guid: 76b0edb60252a1248b4238c3a6e51ac7,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2097539506320808479, guid: 76b0edb60252a1248b4238c3a6e51ac7,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2097539506320808479, guid: 76b0edb60252a1248b4238c3a6e51ac7,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2097539506320808479, guid: 76b0edb60252a1248b4238c3a6e51ac7,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2097539506320808479, guid: 76b0edb60252a1248b4238c3a6e51ac7,
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0

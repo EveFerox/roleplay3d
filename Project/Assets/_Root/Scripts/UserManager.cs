@@ -7,14 +7,12 @@ public class UserManager : Singleton<UserManager>
     public static IReadOnlyDictionary<string, User> Users => Instance._users;
 
     protected void Awake()
-    {       
-        NetworkManager.StopedHost += (sender, args) =>
-        {
+    {
+        NetworkManager.StoppedHost += (sender, args) => {
             Clear();
         };
 
-        NetworkManager.ClientDisconnected += (sender, conn) =>
-        {
+        NetworkManager.ClientDisconnected += (sender, conn) => {
             GetUser(conn)?.DisconnectedInternal();
         };
     }
@@ -27,20 +25,30 @@ public class UserManager : Singleton<UserManager>
         return null;
     }
 
-    public static User Register(NetworkConnection conn)
+    public static bool VerifyUser(string username, string password)
     {
-        if (TryGetAuthUsername(conn, out var username)) {
-            if (Instance._users.TryGetValue(username, out var user)) {
-                if (user.Connection == null) {
-                    user.Connection = conn;
-                    return user;
-                } else {
-                    return null;
-                }
-            }
-            var newUser = new User(username) {Connection = conn};
-            Instance.AddUser(newUser);
-            return newUser;
+        return Instance._users.TryGetValue(username, out var user) && user.Password.Verify(password);
+    }
+
+    public static User CreateUser(RegisterInfo info)
+    {
+        if (Instance._users.ContainsKey(info.Username)) {
+            return null;
+        }
+
+        var user = new User(info.Username, info.Password, info.Email);
+        user.Disconnected += (s, e) => user.Connection = null;
+        Instance._users.Add(info.Username, user);
+        return user;
+    }
+
+    public static User Connect(NetworkConnection conn)
+    {
+        if (TryGetAuthUsername(conn, out var username) &&
+            Instance._users.TryGetValue(username, out var user) &&
+            user.Connection == null) {
+            user.Connection = conn;
+            return user;
         }
         return null;
     }

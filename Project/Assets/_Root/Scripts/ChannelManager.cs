@@ -11,7 +11,7 @@ public class ChannelManager : Singleton<ChannelManager>
 
     protected void Awake()
     {
-        NetworkManager.StartedHost += (sender, args) =>
+        NetworkManager.StartedServer += (sender, args) =>
         {
             _globalFeed = CreateChannel("Global");
 
@@ -20,7 +20,7 @@ public class ChannelManager : Singleton<ChannelManager>
                 HandleMessage(UserManager.GetUser(conn), msg);
             });
         };
-        NetworkManager.StopedHost += (sender, args) =>
+        NetworkManager.StoppedServer += (sender, args) =>
         {
             Clear();
         };

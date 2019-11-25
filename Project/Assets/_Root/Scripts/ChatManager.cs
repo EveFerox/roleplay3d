@@ -23,7 +23,7 @@ public class ChatManager : Singleton<ChatManager>
 
     protected void Awake()
     {
-        NetworkManager.StopedHost += (sender, args) =>
+        NetworkManager.StoppedHost += (sender, args) =>
         {
             CanSend = false;
         };

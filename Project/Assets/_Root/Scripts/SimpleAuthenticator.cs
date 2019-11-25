@@ -4,21 +4,26 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Ceras;
 using UnityEngine;
+using System.Collections.Concurrent;
 
 public class SimpleAuthenticator : NetworkAuthenticator
 {
-    readonly Dictionary<string, string> DataBase = new Dictionary<string, string>();
-
     [SerializeField]
     string _usernameRegex = "^[a-zA-Z][a-zA-Z0-9]{2,19}$";
+
+    [SerializeField]
+    string _passwordRegex = "^[a-zA-Z0-9@$!%*#?&]{3,20}$";
+
+    [SerializeField]
+    string _emailRegex = "^[a-zA-Z0-9@$!%*#?&]{2,20}$";
 
     public event EventHandler OnAuthSuccess;
 
     void Awake()
     {
         //for testing
-        DataBase.Add("qwe", "qwe");
-        DataBase.Add("asd", "asd");
+        UserManager.CreateUser(new RegisterInfo { Username = "qwe", Password = "qwe", Email = "qwe@qwe.qwe" });
+        UserManager.CreateUser(new RegisterInfo { Username = "asd", Password = "asd", Email = "asd@asd.asd" });
     }
 
     public void Login(string username, string password)
@@ -53,8 +58,8 @@ public class SimpleAuthenticator : NetworkAuthenticator
         Debug.LogFormat("Login Request: {0} {1}", req.Username, req.Password);
 
         var valid = ValidateUsername(req.Username) &&
-                    DataBase.TryGetValue(req.Username, out var hash) &&
-                    hash == req.Password;
+                    ValidatePassword(req.Password) &&
+                    UserManager.VerifyUser(req.Username, req.Password);
 
         AuthConnection(conn, valid, req.Username);
     }
@@ -65,8 +70,10 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
         Debug.LogFormat("Register Request: {0} {1}", info.Username ?? "", info.Password ?? "");
 
-        if (ValidateUsername(info.Username) && !DataBase.ContainsKey(info.Username)) {
-            DataBase.Add(info.Username, info.Password);
+        if (ValidateUsername(info.Username) && 
+            ValidatePassword(info.Password) && 
+            ValidateEmail(info.Email) && 
+            UserManager.CreateUser(info) != null) {
             AuthConnection(conn, true, info.Username);
         } else {
             AuthConnection(conn, false);
@@ -78,6 +85,16 @@ public class SimpleAuthenticator : NetworkAuthenticator
         return username != null && Regex.IsMatch(username, _usernameRegex);
     }
 
+    public bool ValidatePassword(string password)
+    {
+        return password != null && Regex.IsMatch(password, _passwordRegex);
+    }
+
+    public bool ValidateEmail(string email)
+    {
+        return email != null && Regex.IsMatch(email, _emailRegex);
+    }
+
     void AuthConnection(NetworkConnection conn, bool success, string token = null)
     {
         if (success) {
@@ -85,7 +102,7 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
             base.OnServerAuthenticated.Invoke(conn);
 
-            if (UserManager.Register(conn) is User user) {
+            if (UserManager.Connect(conn) is User user) {
                 ChannelManager.SubscribeToGlobal(user);
             } else {
                 AuthConnection(conn, false);

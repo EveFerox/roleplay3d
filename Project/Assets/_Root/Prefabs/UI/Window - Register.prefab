@@ -249,13 +249,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _addressFiled: {fileID: 4610062682493253599}
-  _username: {fileID: 7237727623231928273}
+  _userField: {fileID: 7237727623231928273}
   _email: {fileID: 8542187641533928090}
-  _password: {fileID: 4610062682389062237}
+  _passwordField: {fileID: 4610062682389062237}
   _password2: {fileID: 8832734809076015634}
-  _onlogin: {fileID: 0}
-  _register: {fileID: 9206520850648446045}
-  _auth: {fileID: 0}
 --- !u!1 &5163380355315963612
 GameObject:
   m_ObjectHideFlags: 0
@@ -978,26 +975,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_ContentType
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_InputType
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_LineType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_CharacterLimit
-      value: 64
-      objectReference: {fileID: 0}
     - target: {fileID: 2330255249139196583, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -1053,6 +1030,41 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_ContentType
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_InputType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_LineType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_CharacterLimit
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Text
+      value: Repeat
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: _isRefocusOnSubmit
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8683741797427634488, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_FontData.m_HorizontalOverflow
@@ -1077,21 +1089,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: (Password)
-      objectReference: {fileID: 0}
-    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_Text
-      value: Repeat
-      objectReference: {fileID: 0}
-    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: _isRefocusOnSubmit
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 716bdf8ff821d914ea16f2d16dd555d1, type: 3}
@@ -1230,31 +1227,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_ContentType
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_KeyboardType
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_LineType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_CharacterValidation
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_CharacterLimit
-      value: 32
-      objectReference: {fileID: 0}
     - target: {fileID: 2330255249139196583, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -1305,9 +1277,54 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7712968727911103898, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Name
+      value: InputField Email
+      objectReference: {fileID: 0}
     - target: {fileID: 7984773300419126203, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_ContentType
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_KeyboardType
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_LineType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_CharacterValidation
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_CharacterLimit
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Text
+      value: Email
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: _isRefocusOnSubmit
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8683741797427634488, guid: 716bdf8ff821d914ea16f2d16dd555d1,
@@ -1334,21 +1351,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: (Email)
-      objectReference: {fileID: 0}
-    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_Text
-      value: Email
-      objectReference: {fileID: 0}
-    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: _isRefocusOnSubmit
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 716bdf8ff821d914ea16f2d16dd555d1, type: 3}
@@ -1487,11 +1489,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_CharacterLimit
-      value: 32
-      objectReference: {fileID: 0}
     - target: {fileID: 2330255249139196583, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -1542,9 +1539,29 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7712968727911103898, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Name
+      value: InputField User
+      objectReference: {fileID: 0}
     - target: {fileID: 7984773300419126203, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_CharacterLimit
+      value: 32
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: _isRefocusOnSubmit
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2332436590165562580, guid: 716bdf8ff821d914ea16f2d16dd555d1,
@@ -1566,16 +1583,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: (Username)
-      objectReference: {fileID: 0}
-    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: _isRefocusOnSubmit
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 716bdf8ff821d914ea16f2d16dd555d1, type: 3}
@@ -1714,26 +1721,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_ContentType
-      value: 7
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_InputType
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_LineType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_CharacterLimit
-      value: 64
-      objectReference: {fileID: 0}
     - target: {fileID: 2330255249139196583, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -1784,9 +1771,49 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7712968727911103898, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Name
+      value: InputField Password
+      objectReference: {fileID: 0}
     - target: {fileID: 7984773300419126203, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_ContentType
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_InputType
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_LineType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_CharacterLimit
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Text
+      value: Password
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: _isRefocusOnSubmit
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8683741797427634488, guid: 716bdf8ff821d914ea16f2d16dd555d1,
@@ -1813,21 +1840,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: (Password)
-      objectReference: {fileID: 0}
-    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_Text
-      value: Password
-      objectReference: {fileID: 0}
-    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: _isRefocusOnSubmit
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 716bdf8ff821d914ea16f2d16dd555d1, type: 3}
@@ -1966,16 +1978,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_LineType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_CharacterLimit
-      value: 64
-      objectReference: {fileID: 0}
     - target: {fileID: 2330255249139196583, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -2026,9 +2028,39 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7712968727911103898, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Name
+      value: InputField IP
+      objectReference: {fileID: 0}
     - target: {fileID: 7984773300419126203, guid: 716bdf8ff821d914ea16f2d16dd555d1,
         type: 3}
       propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_LineType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8670054381012906303, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_CharacterLimit
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: m_Text
+      value: Address
+      objectReference: {fileID: 0}
+    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
+        type: 3}
+      propertyPath: _isRefocusOnSubmit
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8683741797427634488, guid: 716bdf8ff821d914ea16f2d16dd555d1,
@@ -2055,21 +2087,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Text
       value: (localhost)
-      objectReference: {fileID: 0}
-    - target: {fileID: 2188683447776246915, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4613484189080541840, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: m_Text
-      value: Address
-      objectReference: {fileID: 0}
-    - target: {fileID: 6148418954462418385, guid: 716bdf8ff821d914ea16f2d16dd555d1,
-        type: 3}
-      propertyPath: _isRefocusOnSubmit
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 716bdf8ff821d914ea16f2d16dd555d1, type: 3}

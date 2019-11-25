@@ -12,6 +12,9 @@ namespace UI
         protected void Awake()
         {
             GotoLogin();
+            NetworkManager.OnAuthSuccess += (s, e) => GotoGame();
+            NetworkManager.StoppedClient += (s, e) => GotoLogin();
+            NetworkManager.StoppedServer += (s, e) => GotoLogin();
         }
 
         public static void GotoLogin()
@@ -24,6 +27,10 @@ namespace UI
             SetActive(Instance._panels.register);
         }
 
+        public static void GotoGame() {
+            SetActive(Instance._panels.chat);
+        }
+
         static void SetActive(Component panel)
         {
             Instance._panels.SetActive(panel);
@@ -34,6 +41,7 @@ namespace UI
         {
             public uiLogin login;
             public uiRegister register;
+            public uiChat chat;
 
             public IEnumerable<Component> All
             {
@@ -41,6 +49,7 @@ namespace UI
                 {
                     yield return login;
                     yield return register;
+                    yield return chat;
                 }
             }
 

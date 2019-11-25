@@ -7,6 +7,9 @@ public class User
     public event EventHandler Disconnected;
 
     public readonly string Username;
+    public readonly PasswordHash Password;
+    public readonly string Email;
+
     public NetworkConnection Connection { get; set; }
 
     public bool IsConnected => Connection?.isAuthenticated ?? false;
@@ -16,9 +19,11 @@ public class User
         Disconnected?.Invoke(this, EventArgs.Empty);
     }
 
-    public User(string username)
+    public User(string username, string password, string email)
     {
         Username = username;
+        Password = new PasswordHash(password);
+        Email = email;
     }
 
     public override int GetHashCode()
