@@ -90,7 +90,7 @@ csharp_style_inlined_variable_declaration = true:suggestion
 # C# Formatting Rules         #
 ###############################
 # New line preferences
-csharp_new_line_before_open_brace = types
+csharp_new_line_before_open_brace = types, methods
 csharp_new_line_before_else = false
 csharp_new_line_before_catch = false
 csharp_new_line_before_finally = false

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(LayoutElement))]
 public class UIMover : UIBehaviour, ILayoutIgnorer
 {
-    
+
     public RectTransform canvas;
     public RectTransform parent;
     public HoldButton moveButton;
@@ -27,7 +27,8 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
     private Vector2 _point;
     private Vector2 _pointLast;
 
-    protected override void Awake() {
+    protected override void Awake()
+    {
         base.Awake();
 
         if (allowMove) {
@@ -51,15 +52,17 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
         FindObjectOfType<InputSystemUIInputModule>().point.action.performed += ctx => _point = ctx.ReadValue<Vector2>();
     }
 
-    public void Resize() {
+    public void Resize()
+    {
         var rect = GetComponent<RectTransform>();
         var size = rect.sizeDelta.y * ((allowMove ? 1 : 0) + (allowResize ? 1 : 0) + (allowClose ? 1 : 0));
         rect.sizeDelta = new Vector2(size, rect.sizeDelta.y);
         rect.transform.position = parent.transform.position + new Vector3(size / -2, rect.sizeDelta.y);
         SetDirty();
-    }   
+    }
 
-    public void Validate() {
+    public void Validate()
+    {
         parent.pivot = Vector2.zero;
         parent.anchorMin = new Vector2(0.0f, 0.0f);
         parent.anchorMax = new Vector2(0.0f, 0.0f);
@@ -67,7 +70,8 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
         ignoreLayout = true;
     }
 
-    private void Update() {
+    private void Update()
+    {
         if (_move && allowMove) {
             Vector3 delta = _pointLast - _point;
             _pointLast = _point;
@@ -90,8 +94,10 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
         set { GetComponent<LayoutElement>().ignoreLayout = value; SetDirty(); }
     }
 
-    protected void SetDirty() {
-        if (!IsActive())  return;
+    protected void SetDirty()
+    {
+        if (!IsActive()) return;
+
         LayoutRebuilder.MarkLayoutForRebuild(transform as RectTransform);
     }
 }
