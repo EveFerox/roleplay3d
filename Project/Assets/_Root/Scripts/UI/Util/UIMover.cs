@@ -6,9 +6,8 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
 [RequireComponent(typeof(LayoutElement))]
-public class UIMover : UIBehaviour, ILayoutIgnorer
+public class UIMover : MonoBehaviour
 {
-
     public RectTransform canvas;
     public RectTransform parent;
     public HoldButton moveButton;
@@ -19,18 +18,17 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
     public bool allowResize = true;
     public bool allowClose = true;
 
-    // public bool
+    RectTransform _rect;
+    public RectTransform rect => _rect != null ? _rect : (_rect = GetComponent<RectTransform>());
 
-    private bool _move = false;
-    private bool _resize = false;
+    bool _move = false;
+    bool _resize = false;
 
-    private Vector2 _point;
-    private Vector2 _pointLast;
+    Vector2 _point;
+    Vector2 _pointLast;
 
-    protected override void Awake()
+    void Awake()
     {
-        base.Awake();
-
         if (allowMove) {
             moveButton.gameObject.SetActive(allowMove);
 
@@ -50,37 +48,23 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
         }
 
         FindObjectOfType<InputSystemUIInputModule>().point.action.performed += ctx => _point = ctx.ReadValue<Vector2>();
-    }
 
-    public void Resize()
-    {
-        var rect = GetComponent<RectTransform>();
-        var size = rect.sizeDelta.y * ((allowMove ? 1 : 0) + (allowResize ? 1 : 0) + (allowClose ? 1 : 0));
-        rect.sizeDelta = new Vector2(size, rect.sizeDelta.y);
-        rect.transform.position = parent.transform.position + new Vector3(size / -2, rect.sizeDelta.y);
-        SetDirty();
-    }
+        Resize();
 
-    public void Validate()
-    {
-        parent.pivot = Vector2.zero;
-        parent.anchorMin = new Vector2(0.0f, 0.0f);
-        parent.anchorMax = new Vector2(0.0f, 0.0f);
-
-        ignoreLayout = true;
+        Debug.Log(parent.anchoredPosition);
     }
 
     private void Update()
     {
         if (_move && allowMove) {
-            Vector3 delta = _pointLast - _point;
+            var delta = _pointLast - _point;
+            if (delta == Vector2.zero) return;
             _pointLast = _point;
-
             var bounds = canvas.sizeDelta - parent.sizeDelta;
-            parent.position += delta * -1;
-            parent.position = new Vector3(
-                Mathf.Clamp(parent.position.x, 0, bounds.x),
-                Mathf.Clamp(parent.position.y, 0, bounds.y));
+            parent.anchoredPosition += delta * -1;
+            parent.anchoredPosition = new Vector2(
+                 Mathf.Clamp(parent.anchoredPosition.x, 0, bounds.x),
+                 Mathf.Clamp(parent.anchoredPosition.y, 0, bounds.y));
         }
         if (_resize && allowResize) {
             parent.sizeDelta -= _pointLast - _point;
@@ -88,16 +72,19 @@ public class UIMover : UIBehaviour, ILayoutIgnorer
         }
     }
 
-
-    public bool ignoreLayout {
-        get => GetComponent<LayoutElement>().ignoreLayout;
-        set { GetComponent<LayoutElement>().ignoreLayout = value; SetDirty(); }
-    }
-
-    protected void SetDirty()
+    public void Resize()
     {
-        if (!IsActive()) return;
-
-        LayoutRebuilder.MarkLayoutForRebuild(transform as RectTransform);
+        var size = rect.sizeDelta.y * ((allowMove ? 1 : 0) + (allowResize ? 1 : 0) + (allowClose ? 1 : 0));
+        rect.pivot = Vector2.zero;
+        rect.anchorMin = new Vector2(1.0f, 1.0f);
+        rect.anchorMax = new Vector2(1.0f, 1.0f);
+        rect.sizeDelta = new Vector2(size, rect.sizeDelta.y);
+        rect.anchoredPosition3D = -new Vector3(size, rect.sizeDelta.y);
+        LayoutRebuilder.MarkLayoutForRebuild(rect);
+        parent.pivot = Vector2.zero;
+        // parent.anchorMin = new Vector2(0.0f, 0.0f);
+        // parent.anchorMax = new Vector2(0.0f, 0.0f);
+        if (GetComponent<LayoutElement>() is LayoutElement elem) elem.ignoreLayout = true;
     }
 }
+

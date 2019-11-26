@@ -20,6 +20,6 @@ class uiChannel : MonoBehaviour
     }
 
     private void UserChanged(object sender, ChannelFeed.UserChangeInfo e) {
-        _message.text = $"[{_channel.Name}] : {string.Join(", ", _channel.Users)}";
+        _message.text = $"[{_channel.Name}] : {string.Join(", ", _channel.Users.Select(u => u.Username))}";
     }
 }

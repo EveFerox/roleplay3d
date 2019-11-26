@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 [CustomEditor(typeof(UIMover))]
 // [CanEditMultipleObjects]
@@ -17,22 +17,27 @@ public class UIMoverEditor : Editor
     bool _allowResize = true;
     bool _allowClose = true;
 
-    Editor _rectTransform;
+    DrivenRectTransformTracker _tracker;
 
-    private void OnEnable() {
-        var ass = Assembly.GetAssembly(typeof(UnityEditor.Editor));
-        var rtEditor = ass.GetType("UnityEditor.RectTransformEditor");
-        _rectTransform = CreateEditor(Target.GetComponent<RectTransform>(), rtEditor);
-        // UnityEditor.AnimatedValues.AnimBool
-        
+    private void OnEnable()
+    {
+        _tracker.Clear();
+        _tracker.Add(this, Target.GetComponent<RectTransform>(),
+            DrivenTransformProperties.AnchoredPosition |
+            DrivenTransformProperties.Anchors |
+            DrivenTransformProperties.Pivot |
+            DrivenTransformProperties.SizeDeltaX);
+        _tracker.Add(this, Target.parent,
+            // DrivenTransformProperties.Anchors |
+            DrivenTransformProperties.Pivot);
+        Target.Resize();
+
     }
 
-
-    public override void OnInspectorGUI() {
+    public override void OnInspectorGUI()
+    {
         base.OnInspectorGUI();
-        if (GUILayout.Button("Validate")) {
-            Target.Validate();
-        }
+        if (Target == null) Debug.Log("Target null");
         if (_allowMove != Target.allowMove) {
             _allowMove = !_allowMove;
             Target.moveButton.gameObject.SetActive(_allowMove);
@@ -47,7 +52,7 @@ public class UIMoverEditor : Editor
             _allowClose = !_allowClose;
             Target.closeButton.gameObject.SetActive(_allowClose);
             Target.Resize();
-        }        
+        }
     }
 }
 
