@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Root/Scenes/Sekkmer-test.unity
     guid: 5dfa52958405b1a4db9c01c4f9fb6dd3
+  - enabled: 1
+    path: Assets/_Root/Scenes/Online.unity
+    guid: 5be7fd223e4009c44abf4c69186bc506
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: bab863e761b11984387f65d61052c679,
       type: 2}

@@ -4,7 +4,7 @@ using System.Collections;
 using Mirror;
 using Newtonsoft.Json;
 
-public class ChatMessage : DefaultMessageBase
+public class ChatMessage : IMessageBase
 {
     public string Sender { get; set; }
     public string Channel { get; set; }
@@ -16,15 +16,19 @@ public class ChatMessage : DefaultMessageBase
         return $"[{Time.ToShortTimeString()} - {Channel}] {Sender}: {Message}";
     }
 
-    protected override void CopyFrom(object obj)
+    public void Deserialize(NetworkReader reader)
     {
-        if (obj is ChatMessage v) {
-            Sender = v.Sender;
-            Channel = v.Channel;
-            Message = v.Message;
-            Time = v.Time;
-        } else {
-            Debug.LogWarning("Trying to CopyFrom not ChatMessage");
-        }
+        Time = DateTime.FromBinary(reader.ReadInt64());
+        Sender = reader.ReadString();
+        Channel = reader.ReadString();
+        Message = reader.ReadString();
+    }
+
+    public void Serialize(NetworkWriter writer)
+    {
+        writer.WriteInt64(Time.ToBinary());
+        writer.WriteString(Sender);
+        writer.WriteString(Channel);
+        writer.WriteString(Message);
     }
 }

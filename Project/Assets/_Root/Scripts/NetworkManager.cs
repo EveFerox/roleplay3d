@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -51,7 +52,7 @@ public class NetworkManager : Mirror.NetworkManager
         _auth.Login(username, password);
     }
 
-    public void Register(RegisterInfo info) {
+    public void Register(RegisterRequestMessage info) {
         EnsureClientStarted();
 
         _auth.Register(info);

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Ceras;
 using UnityEngine;
 using System.Collections.Concurrent;
 
@@ -22,8 +21,8 @@ public class SimpleAuthenticator : NetworkAuthenticator
     void Awake()
     {
         //for testing
-        UserManager.CreateUser(new RegisterInfo { Username = "qwe", Password = "qwe", Email = "qwe@qwe.qwe" });
-        UserManager.CreateUser(new RegisterInfo { Username = "asd", Password = "asd", Email = "asd@asd.asd" });
+        UserManager.CreateUser(new RegisterRequestMessage("qwe", "qwe", "qwe@qwe.qwe"));
+        UserManager.CreateUser(new RegisterRequestMessage("asd", "asd", "asd@asd.asd"));
     }
 
     public void Login(string username, string password)
@@ -32,10 +31,9 @@ public class SimpleAuthenticator : NetworkAuthenticator
         NetworkClient.Send(msg);
     }
 
-    public void Register(RegisterInfo info)
+    public void Register(RegisterRequestMessage req)
     {
-        var msg = new RegisterRequestMessage(info);
-        NetworkClient.Send(msg);
+        NetworkClient.Send(req);
     }
 
     public override void OnStartServer()
@@ -66,15 +64,14 @@ public class SimpleAuthenticator : NetworkAuthenticator
 
     void OnRegisterRequestMessage(NetworkConnection conn, RegisterRequestMessage req)
     {
-        var info = req.RegisterInfo;
 
-        Debug.LogFormat("Register Request: {0} {1}", info.Username ?? "", info.Password ?? "");
+        Debug.LogFormat("Register Request: {0} {1}", req.Username ?? "", req.Password ?? "");
 
-        if (ValidateUsername(info.Username) && 
-            ValidatePassword(info.Password) && 
-            ValidateEmail(info.Email) && 
-            UserManager.CreateUser(info) != null) {
-            AuthConnection(conn, true, info.Username);
+        if (ValidateUsername(req.Username) &&
+            ValidatePassword(req.Password) &&
+            ValidateEmail(req.Email) &&
+            UserManager.CreateUser(req) != null) {
+            AuthConnection(conn, true, req.Username);
         } else {
             AuthConnection(conn, false);
         }
@@ -131,82 +128,84 @@ public class SimpleAuthenticator : NetworkAuthenticator
             conn.Disconnect();
         }
     }
+}
 
-    public class LoginRequestMessage : DefaultMessageBase
+public class LoginRequestMessage : IMessageBase
+{
+    public string Username { get; set; }
+    public string Password { get; set; }
+
+    public LoginRequestMessage() { }
+    public LoginRequestMessage(string username, string password)
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
-
-        public LoginRequestMessage() { }
-        public LoginRequestMessage(string username, string password)
-        {
-            Username = username;
-            Password = password;
-        }
-
-        protected override void CopyFrom(object obj)
-        {
-            if (obj is LoginRequestMessage v) {
-                Username = v.Username;
-                Password = v.Password;
-            }
-        }
+        Username = username;
+        Password = password;
     }
 
-    public class RegisterRequestMessage : DefaultMessageBase
+    public void Deserialize(NetworkReader reader)
     {
-        [Include]
-        public RegisterInfo RegisterInfo { get; set; }
-        
-        public RegisterRequestMessage() { }
-        public RegisterRequestMessage(RegisterInfo registerInfo)
-        {
-            RegisterInfo = registerInfo;
-        }
-
-        protected override void CopyFrom(object obj)
-        {
-            if (obj is RegisterRequestMessage v) {
-                RegisterInfo = v.RegisterInfo;
-            }
-        }
+        Username = reader.ReadString();
+        Password = reader.ReadString();
     }
 
-    public class AuthenticationResponseMessage : DefaultMessageBase
+    public void Serialize(NetworkWriter writer)
     {
-        public bool IsSuccess { get; set; }
-        public string Message { get; set; }
-        
-        public AuthenticationResponseMessage() { }
-        public AuthenticationResponseMessage(bool isSuccess, string message)
-        {
-            IsSuccess = isSuccess;
-            Message = message;
-        }
-
-        protected override void CopyFrom(object obj)
-        {
-            if (obj is AuthenticationResponseMessage v) {
-                IsSuccess = v.IsSuccess;
-                Message = v.Message;
-            }
-        }
+        writer.WriteString(Username);
+        writer.WriteString(Password);
     }
 }
 
-public struct RegisterInfo
+public class RegisterRequestMessage : IMessageBase
 {
-    [Include]
     public string Username { get; set; }
-    [Include]
     public string Password { get; set; }
-    [Include]
     public string Email { get; set; }
 
-    public RegisterInfo(string username, string password, string email)
+    public RegisterRequestMessage() { }
+    public RegisterRequestMessage(string username, string password, string email)
     {
         Username = username;
         Password = password;
         Email = email;
     }
+
+    public void Deserialize(NetworkReader reader)
+    {
+        Username = reader.ReadString();
+        Password = reader.ReadString();
+        Email = reader.ReadString();
+    }
+
+    public void Serialize(NetworkWriter writer)
+    {
+        writer.WriteString(Username);
+        writer.WriteString(Password);
+        writer.WriteString(Email);
+    }
 }
+
+public class AuthenticationResponseMessage : IMessageBase
+{
+    public bool IsSuccess { get; set; }
+    public string Message { get; set; }
+
+    public AuthenticationResponseMessage() { }
+    public AuthenticationResponseMessage(bool isSuccess, string message)
+    {
+        IsSuccess = isSuccess;
+        Message = message;
+    }
+
+    public void Deserialize(NetworkReader reader)
+    {
+        IsSuccess = reader.ReadBoolean();
+        Message = reader.ReadString();
+    }
+
+    public void Serialize(NetworkWriter writer)
+    {
+        writer.WriteBoolean(IsSuccess);
+        writer.WriteString(Message);
+    }
+}
+

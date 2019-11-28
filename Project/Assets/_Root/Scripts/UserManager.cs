@@ -30,15 +30,15 @@ public class UserManager : Singleton<UserManager>
         return Instance._users.TryGetValue(username, out var user) && user.Password.Verify(password);
     }
 
-    public static User CreateUser(RegisterInfo info)
+    public static User CreateUser(RegisterRequestMessage req)
     {
-        if (Instance._users.ContainsKey(info.Username)) {
+        if (Instance._users.ContainsKey(req.Username)) {
             return null;
         }
 
-        var user = new User(info.Username, info.Password, info.Email);
+        var user = new User(req.Username, req.Password, req.Email);
         user.Disconnected += (s, e) => user.Connection = null;
-        Instance._users.Add(info.Username, user);
+        Instance._users.Add(req.Username, user);
         return user;
     }
 

@@ -65,7 +65,7 @@ namespace UI
                 return;
             }
 
-            var info = new RegisterInfo(_userField.text, _passwordField.text, _email.text);
+            var info = new RegisterRequestMessage(_userField.text, _passwordField.text, _email.text);
 
             NetworkManager.Instance.Register(info);
         }

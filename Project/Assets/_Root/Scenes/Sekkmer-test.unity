@@ -591,6 +591,7 @@ GameObject:
   - component: {fileID: 283136239}
   - component: {fileID: 283136241}
   - component: {fileID: 283136243}
+  - component: {fileID: 283136242}
   m_Layer: 0
   m_Name: _Network
   m_TagString: Untagged
@@ -676,7 +677,7 @@ MonoBehaviour:
   startOnHeadless: 1
   serverTickRate: 30
   showDebugMessages: 0
-  offlineScene: test
+  offlineScene: 
   onlineScene: 
   transport: {fileID: 283136236}
   networkAddress: localhost
@@ -740,6 +741,19 @@ MonoBehaviour:
   showGUI: 1
   offsetX: 0
   offsetY: 0
+--- !u!114 &283136242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 283136234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfe1aa91a536dd540855d511d4ee538f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scean: Online
 --- !u!114 &283136243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -780,7 +794,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 286347528}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &286347530
 Camera:
   m_ObjectHideFlags: 0
