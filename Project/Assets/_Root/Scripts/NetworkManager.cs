@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Extended <see cref="Mirror.NetworkManager"/>
 /// </summary>
-public class NetworkManager : NetworkRoomManager
+public class NetworkManager : Mirror.NetworkManager
 {
     public static NetworkManager Instance => singleton as NetworkManager;
 
@@ -63,6 +63,8 @@ public class NetworkManager : NetworkRoomManager
         StartClient();
     }
 
+    #region Events
+
     public override void OnStartHost() {
         base.OnStartHost();
         StartedHost?.Invoke(this, EventArgs.Empty);
@@ -113,6 +115,8 @@ public class NetworkManager : NetworkRoomManager
         ClientDisconnected?.Invoke(this, conn);
     }
 
+    #endregion Events
+
     // Transport.activeTransport maybe null, original code does not check this
     public override void OnApplicationQuit() {
         if (NetworkClient.isConnected) {
@@ -125,6 +129,11 @@ public class NetworkManager : NetworkRoomManager
             print("OnApplicationQuit: stopped server");
         }
 
-        Transport.activeTransport?.Shutdown();
+        if (Transport.activeTransport != null) Transport.activeTransport.Shutdown();
+    }
+
+    public override void OnServerAddPlayer(NetworkConnection conn)
+    {
+        Debug.Log("OnServerAddPlayer");
     }
 }
