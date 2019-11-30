@@ -18,15 +18,9 @@ public class ChannelManager : Singleton<ChannelManager>
         {
             _globalFeed = CreateChannel("Global");
 
-            NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) =>
-            {
-                HandleMessage(UserManager.GetUser(conn), msg);
-            });
+            NetworkServer.RegisterHandler((NetworkConnection conn, ChatMessage msg) => { HandleMessage(UserManager.GetUser(conn), msg); });
         };
-        NetworkManager.StoppedServer += (sender, args) =>
-        {
-            Clear();
-        };
+        NetworkManager.StoppedServer += (sender, args) => { Clear(); };
     }
 
     public ChannelFeed CreateChannel(string name)
@@ -59,6 +53,8 @@ public class ChannelManager : Singleton<ChannelManager>
 
         OnChanellCreated?.Invoke(this, channel);
 
+        Debug.Log($"ChannelManager: created channel {name}", this);
+
         return channel;
     }
 
@@ -72,28 +68,21 @@ public class ChannelManager : Singleton<ChannelManager>
 
     void HandleMessage(User user, ChatMessage msg)
     {
-        if (msg.Message.Length == 0)
-        {
+        if (msg.Message.Length == 0) {
             return;
         }
-        if (_channels.TryGetValue(msg.Channel, out var channel))
-        {
+        if (_channels.TryGetValue(msg.Channel, out var channel)) {
             if (msg.Message[0] == '/') {
                 channel.Control(user, msg.Message.Substring(1));
             } else {
                 channel.SendChat(user, msg);
             }
-        }
-        else if (msg.Message.IndexOf("/create ") == 0)
-        {
+        } else if (msg.Message.IndexOf("/create ") == 0) {
             var c = CreateChannel(msg.Message.Substring(8));
-            if (c != null)
-            {
+            if (c != null) {
                 c.Subscribe(user);
             }
-        }
-        else if (msg.Message.IndexOf("/logoff") == 0)
-        {
+        } else if (msg.Message.IndexOf("/logoff") == 0) {
             user.Connection.Disconnect();
         }
     }
@@ -105,11 +94,10 @@ public class ChannelManager : Singleton<ChannelManager>
 
     void Clear()
     {
-        foreach(var channel in _channels.Values) {
+        foreach (var channel in _channels.Values) {
             channel.RemoveChannel();
         }
         _channels.Clear();
         _globalFeed = null;
     }
 }
-

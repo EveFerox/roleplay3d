@@ -1,6 +1,7 @@
 ﻿using Mirror;
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ChannelFeed
 {
@@ -31,6 +32,7 @@ public class ChannelFeed
         _users.Add(user);
         user.Disconnected += (s, e) => { OnDisconnect(user); };
         UserChanged?.Invoke(this, new UserChangeInfo(this, user, UserChangeE.Subscribed));
+        Debug.Log($"Channel {Name}: OnSubscribe user: {user.Username}");
         SendInfo($"{user.Username} connected");
     }
 
